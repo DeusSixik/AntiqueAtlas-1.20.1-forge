@@ -4,6 +4,7 @@ import hunternif.mc.api.client.ClientTileAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.client.TileRenderIterator;
 import hunternif.mc.impl.atlas.core.AtlasData;
+import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.core.TileDataStorage;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutTileC2SPacket;
 import hunternif.mc.impl.atlas.util.Log;
@@ -41,9 +42,15 @@ public class TileApiImplClient implements ClientTileAPI {
 
     @Override
     public TileRenderIterator getTiles(Level world, int atlasID, Rect scope, int step) {
-        TileRenderIterator iter = new TileRenderIterator(AntiqueAtlas.tileData
+        ITileStorage storage = AntiqueAtlas.lodTileAggregationService.createStorage(
+                AntiqueAtlas.tileData
                 .getData(atlasID, world)
-                .getWorldData(world.dimension()));
+                .getWorldData(world.dimension()),
+                scope,
+                step,
+                world.dimension().location()
+        );
+        TileRenderIterator iter = new TileRenderIterator(storage);
         iter.setScope(scope);
         iter.setStep(step);
         return iter;

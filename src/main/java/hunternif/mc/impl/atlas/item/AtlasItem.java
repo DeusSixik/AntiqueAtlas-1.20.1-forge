@@ -1,16 +1,9 @@
 package hunternif.mc.impl.atlas.item;
 
-import java.util.Collection;
-import java.util.Objects;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.AntiqueAtlasClientSegment;
 import hunternif.mc.impl.atlas.core.AtlasData;
-import hunternif.mc.impl.atlas.core.TileInfo;
-import hunternif.mc.impl.atlas.marker.MarkersData;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.DimensionUpdateS2CPacket;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -80,25 +73,9 @@ public class AtlasItem extends Item {
 
         int atlasId = getAtlasID(stack);
 
-        // On the first run send the map from the server to the client:
         Player player = (Player) entity;
-        if (!world.isClientSide && !data.isSyncedToPlayer(player) && !data.isEmpty()) {
-            data.syncToPlayer(atlasId, player);
-        }
-
-        // Same thing with the local markers:
-        MarkersData markers = AntiqueAtlas.markersData.getMarkersData(stack, world);
-        if (!world.isClientSide && !markers.isSyncedOnPlayer(player) && !markers.isEmpty()) {
-            markers.syncToPlayer(atlasId, (ServerPlayer) player);
-        }
-
         if (!world.isClientSide) {
-            // Updating map around player
-            Collection<TileInfo> newTiles = AntiqueAtlas.worldScanner.updateAtlasAroundPlayer(data, player);
-
-            if (!newTiles.isEmpty()) {
-                new DimensionUpdateS2CPacket(atlasId, player.getCommandSenderWorld().dimension(), newTiles).send(Objects.requireNonNull(player.getServer()));
-            }
+            AntiqueAtlas.atlasScanService.syncAtlasToPlayer((net.minecraft.server.level.ServerPlayer) player, atlasId);
         }
     }
 

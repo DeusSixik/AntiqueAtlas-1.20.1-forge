@@ -14,11 +14,12 @@ import net.minecraft.world.entity.player.Player;
  */
 public class DeathWatcher {
     public static void onPlayerDeath(Player player) {
-        if (AntiqueAtlas.CONFIG.autoDeathMarker) {
+        if (AntiqueAtlas.CONFIG.autoDeathMarker && !player.level().isClientSide()) {
             for (int atlasID : AtlasAPI.getPlayerAtlases(player)) {
                 AtlasAPI.getMarkerAPI().putMarker(player.getCommandSenderWorld(), true, atlasID, VersionHelper.toLoc("antiqueatlas:tomb"),
                         Component.translatable("gui.antiqueatlas.marker.tomb", player.getName()),
                         (int) player.getX(), (int) player.getZ());
+                AntiqueAtlas.deathMarkerService.trimExcessDeathMarkers(player.level(), atlasID);
             }
         }
     }

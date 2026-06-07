@@ -39,10 +39,17 @@ import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutTileS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncPlayerAtlasIdS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.TileGroupsS2CPacket;
+import hunternif.mc.impl.atlas.lod.LodTileAggregationService;
+import hunternif.mc.impl.atlas.rules.TileSelectionConfig;
+import hunternif.mc.impl.atlas.rules.TileSelectionRules;
+import hunternif.mc.impl.atlas.service.ActiveAtlasResolver;
+import hunternif.mc.impl.atlas.service.AtlasScanService;
+import hunternif.mc.impl.atlas.service.DeathMarkerService;
 import hunternif.mc.impl.atlas.structure.EndCity;
 import hunternif.mc.impl.atlas.structure.JigsawConfig;
 import hunternif.mc.impl.atlas.structure.NetherFortress;
 import hunternif.mc.impl.atlas.structure.Overworld;
+import hunternif.mc.impl.atlas.structure.StructurePieceConfig;
 import hunternif.mc.impl.atlas.structure.StructureHandler;
 import hunternif.mc.impl.atlas.structure.Village;
 import net.minecraft.core.registries.Registries;
@@ -68,7 +75,12 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 
     public static Logger LOG = LogManager.getLogger(NAME);
 
+    public static final TileSelectionRules tileSelectionRules = new TileSelectionRules();
+    public static final LodTileAggregationService lodTileAggregationService = new LodTileAggregationService(tileSelectionRules);
     public static final WorldScanner worldScanner = new WorldScanner();
+    public static final ActiveAtlasResolver activeAtlasResolver = new ActiveAtlasResolver();
+    public static final AtlasScanService atlasScanService = new AtlasScanService(activeAtlasResolver);
+    public static final DeathMarkerService deathMarkerService = new DeathMarkerService();
     public static final TileDataHandler tileData = new TileDataHandler();
     public static final MarkersDataHandler markersData = new MarkersDataHandler();
 
@@ -120,10 +132,8 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
         //StructurePieceAddedCallback.EVENT.register(StructureHandler::resolve);
         //StructureAddedCallback.EVENT.register(StructureHandler::resolve);
 
-        NetherFortress.registerPieces();
         EndCity.registerMarkers();
         Village.registerMarkers();
-        Overworld.registerPieces();
     }
     
     @Override
@@ -156,6 +166,8 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
     
     @Override
     public void registerServerRelaodableResources(ReloadListeners reloadListener) {
+        reloadListener.listenTo(new TileSelectionConfig(tileSelectionRules));
+        reloadListener.listenTo(new StructurePieceConfig());
         JigsawConfig jigsawConfig = new JigsawConfig();
         reloadListener.listenTo(jigsawConfig);
     }

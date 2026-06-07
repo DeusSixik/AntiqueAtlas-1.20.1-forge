@@ -1,4 +1,8 @@
 {
 	"version": 1,
-	"texture_set": "antiqueatlas:nether_bridge_x"
+	"texture_set": "antiqueatlas:nether_bridge_x",
+	"lod": {
+		"group": "antiqueatlas:nether_fortress",
+		"priority": 20
+	}
 }

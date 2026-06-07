@@ -15,6 +15,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import hunternif.mc.api.AtlasAPI;
+import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.util.MathUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -40,6 +41,8 @@ public class StructureHandler {
     private static final Multimap<ResourceLocation, Tuple<ResourceLocation, Setter>> JIGSAW_TO_TILE_MAP = HashMultimap.create();
     private static final Map<ResourceLocation, Tuple<ResourceLocation, Component>> STRUCTURE_PIECE_TO_MARKER_MAP = new HashMap<>();
     private static final Map<ResourceLocation, Integer> STRUCTURE_PIECE_TILE_PRIORITY = new HashMap<>();
+    private static final Set<ResourceLocation> LOGGED_MISSING_STRUCTURE_PIECES = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Set<ResourceLocation> LOGGED_MISSING_JIGSAW_PATTERNS = Collections.newSetFromMap(new ConcurrentHashMap<>());
     public static final Setter ALWAYS = (world, element, box, rotation) -> Collections.singleton(new ChunkPos(MathUtil.getCenter(box).getX() >> 4, MathUtil.getCenter(box).getZ() >> 4));
 
 
@@ -71,12 +74,78 @@ public class StructureHandler {
         return Collections.emptyList();
     }
 
+    public static Collection<ChunkPos> SPAN_X(Level ignoredWorld, StructurePoolElement ignoredElement, BoundingBox box, StructurePiece piece) {
+        if (box.getXSpan() <= 16) {
+            return Collections.emptyList();
+        }
+
+        Set<ChunkPos> matches = new java.util.HashSet<>();
+        int chunkZ = MathUtil.getCenter(box).getZ() >> 4;
+        for (int x = box.minX(); x < box.maxX(); x += 16) {
+            matches.add(new ChunkPos(x >> 4, chunkZ));
+        }
+        return matches;
+    }
+
+    public static Collection<ChunkPos> SPAN_Z(Level ignoredWorld, StructurePoolElement ignoredElement, BoundingBox box, StructurePiece piece) {
+        if (box.getZSpan() <= 16) {
+            return Collections.emptyList();
+        }
+
+        Set<ChunkPos> matches = new java.util.HashSet<>();
+        int chunkX = MathUtil.getCenter(box).getX() >> 4;
+        for (int z = box.minZ(); z < box.maxZ(); z += 16) {
+            matches.add(new ChunkPos(chunkX, z >> 4));
+        }
+        return matches;
+    }
+
+    public static Collection<ChunkPos> BRIDGE_END_X(Level ignoredWorld, StructurePoolElement ignoredElement, BoundingBox box, StructurePiece piece) {
+        if (box.getXSpan() > box.getZSpan()) {
+            return Collections.singleton(new ChunkPos(box.getCenter().getX() >> 4, box.getCenter().getZ() >> 4));
+        }
+        return Collections.emptySet();
+    }
+
+    public static Collection<ChunkPos> BRIDGE_END_Z(Level ignoredWorld, StructurePoolElement ignoredElement, BoundingBox box, StructurePiece piece) {
+        if (box.getZSpan() > box.getXSpan()) {
+            return Collections.singleton(new ChunkPos(box.getCenter().getX() >> 4, box.getCenter().getZ() >> 4));
+        }
+        return Collections.emptySet();
+    }
+
+    public static Collection<ChunkPos> ABOVE_GROUND(Level world, StructurePoolElement ignoredElement, BoundingBox box, StructurePiece piece) {
+        if (world.getSeaLevel() - 4 <= box.getCenter().getY()) {
+            return Collections.singleton(new ChunkPos(box.getCenter()));
+        }
+        return Collections.emptyList();
+    }
+
     private static final Set<Triple<Integer, Integer, ResourceLocation>> VISITED_STRUCTURES = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    public static void clearStructurePieceTileRegistrations() {
+        STRUCTURE_PIECE_TO_TILE_MAP.clear();
+        STRUCTURE_PIECE_TILE_PRIORITY.clear();
+        LOGGED_MISSING_STRUCTURE_PIECES.clear();
+    }
+
+    public static void clearJigsawTileRegistrations() {
+        JIGSAW_TO_TILE_MAP.clear();
+        LOGGED_MISSING_JIGSAW_PATTERNS.clear();
+    }
+
+    public static void registerTile(ResourceLocation structurePieceId, int priority, ResourceLocation textureId, Setter setter) {
+        STRUCTURE_PIECE_TO_TILE_MAP.put(structurePieceId, new Tuple<>(textureId, setter));
+        STRUCTURE_PIECE_TILE_PRIORITY.put(textureId, priority);
+    }
+
+    public static void registerTile(ResourceLocation structurePieceId, int priority, ResourceLocation textureId) {
+        registerTile(structurePieceId, priority, textureId, ALWAYS);
+    }
 
     public static void registerTile(StructurePieceType structurePieceType, int priority, ResourceLocation textureId, Setter setter) {
         ResourceLocation id = BuiltInRegistries.STRUCTURE_PIECE.getKey(structurePieceType);
-        STRUCTURE_PIECE_TO_TILE_MAP.put(id, new Tuple<>(textureId, setter));
-        STRUCTURE_PIECE_TILE_PRIORITY.put(textureId, priority);
+        registerTile(id, priority, textureId, setter);
     }
 
     public static void registerTile(StructurePieceType structurePieceType, int priority, ResourceLocation textureId) {
@@ -96,14 +165,43 @@ public class StructureHandler {
         STRUCTURE_PIECE_TO_MARKER_MAP.put(structureFeature.location(), new Tuple<>(markerType, name));
     }
 
+    public static Setter setterByName(String setter, ResourceLocation resourceId) {
+        return switch (setter) {
+            case "always" -> StructureHandler.ALWAYS;
+            case "if_x_direction" -> StructureHandler::IF_X_DIRECTION;
+            case "if_z_direction" -> StructureHandler::IF_Z_DIRECTION;
+            case "span_x" -> StructureHandler::SPAN_X;
+            case "span_z" -> StructureHandler::SPAN_Z;
+            case "bridge_end_x" -> StructureHandler::BRIDGE_END_X;
+            case "bridge_end_z" -> StructureHandler::BRIDGE_END_Z;
+            case "above_ground" -> StructureHandler::ABOVE_GROUND;
+            default -> throw new IllegalArgumentException("Unknown setter `" + setter + "` in " + resourceId);
+        };
+    }
+
     private static int getPriority(ResourceLocation structurePieceId) {
-        return STRUCTURE_PIECE_TILE_PRIORITY.getOrDefault(structurePieceId, Integer.MAX_VALUE);
+        return AntiqueAtlas.tileSelectionRules.getStructurePriority(
+                structurePieceId,
+                null,
+                STRUCTURE_PIECE_TILE_PRIORITY.getOrDefault(structurePieceId, Integer.MAX_VALUE)
+        );
     }
 
     private static void put(Level world, int chunkX, int chunkZ, ResourceLocation textureId) {
         ResourceLocation existingTile = AtlasAPI.getTileAPI().getGlobalTile(world, chunkX, chunkZ);
 
-        if (getPriority(textureId) < getPriority(existingTile)) {
+        int newPriority = AntiqueAtlas.tileSelectionRules.getStructurePriority(
+                textureId,
+                world.dimension().location(),
+                STRUCTURE_PIECE_TILE_PRIORITY.getOrDefault(textureId, Integer.MAX_VALUE)
+        );
+        int existingPriority = AntiqueAtlas.tileSelectionRules.getStructurePriority(
+                existingTile,
+                world.dimension().location(),
+                STRUCTURE_PIECE_TILE_PRIORITY.getOrDefault(existingTile, Integer.MAX_VALUE)
+        );
+
+        if (newPriority > existingPriority) {
             AtlasAPI.getTileAPI().putGlobalTile(world, textureId, chunkX, chunkZ);
         }
     }
@@ -114,7 +212,13 @@ public class StructureHandler {
                 Optional<ResourceLocation> left = singlePoolElement.template.left();
 
                 if (left.isPresent()) {
-                    for (Tuple<ResourceLocation, Setter> entry : JIGSAW_TO_TILE_MAP.get(left.get())) {
+                    ResourceLocation templateId = left.get();
+                    Collection<Tuple<ResourceLocation, Setter>> entries = JIGSAW_TO_TILE_MAP.get(templateId);
+                    if (entries.isEmpty()) {
+                        logMissingJigsawPattern(templateId, jigsawPiece, world);
+                    }
+
+                    for (Tuple<ResourceLocation, Setter> entry : entries) {
                         ResourceLocation tile = entry.getA();
                         Setter setter = entry.getB();
                         for (ChunkPos pos : setter.matches(world, singlePoolElement, pool.getBoundingBox(), jigsawPiece)) {
@@ -148,7 +252,52 @@ public class StructureHandler {
                     put(world, pos.x, pos.z, entry.getA());
                 }
             }
+        } else {
+            logMissingStructurePiece(structurePieceId, structurePiece, world);
         }
+    }
+
+    private static void logMissingStructurePiece(ResourceLocation structurePieceId, StructurePiece structurePiece, ServerLevel world) {
+        if (structurePieceId != null && LOGGED_MISSING_STRUCTURE_PIECES.add(structurePieceId)) {
+            AntiqueAtlas.LOG.info(
+                    "Atlas has no tile mapping for structure piece type {} in dimension {} (piece class: {}). Add it under data/*/atlas/structure_pieces/*.json if needed. Suggested template:{}",
+                    structurePieceId,
+                    world.dimension().location(),
+                    structurePiece.getClass().getName(),
+                    buildStructurePieceTemplate(structurePieceId)
+            );
+        }
+    }
+
+    private static void logMissingJigsawPattern(ResourceLocation templateId, StructurePiece structurePiece, ServerLevel world) {
+        if (LOGGED_MISSING_JIGSAW_PATTERNS.add(templateId)) {
+            AntiqueAtlas.LOG.info(
+                    "Atlas has no jigsaw tile mapping for template {} in dimension {} (piece class: {}). Add it under data/*/atlas/structures/... if needed. Suggested template:{}",
+                    templateId,
+                    world.dimension().location(),
+                    structurePiece.getClass().getName(),
+                    buildJigsawTemplate(templateId)
+            );
+        }
+    }
+
+    private static String buildStructurePieceTemplate(ResourceLocation structurePieceId) {
+        return "\n{\n" +
+                "  \"version\": 1,\n" +
+                "  \"piece_type\": \"" + structurePieceId + "\",\n" +
+                "  \"tile\": \"antiqueatlas:replace_me\",\n" +
+                "  \"priority\": 100,\n" +
+                "  \"setter\": \"always\"\n" +
+                "}";
+    }
+
+    private static String buildJigsawTemplate(ResourceLocation templateId) {
+        return "\n{\n" +
+                "  \"version\": 1,\n" +
+                "  \"tile\": \"antiqueatlas:replace_me\",\n" +
+                "  \"priority\": 100\n" +
+                "}\n" +
+                "// path example: data/" + templateId.getNamespace() + "/atlas/structures/" + templateId.getPath() + ".json";
     }
 
     public static void resolve(StructureStart structureStart, ServerLevel world) {

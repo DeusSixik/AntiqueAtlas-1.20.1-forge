@@ -1,0 +1,7 @@
+{
+    "priority":  10,
+    "piece_type":  "minecraft:rupo",
+    "setter":  "above_ground",
+    "version":  1,
+    "tile":  "antiqueatlas:ruined_portal"
+}

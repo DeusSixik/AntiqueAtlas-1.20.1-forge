@@ -602,6 +602,7 @@ public class GuiAtlas extends GuiComponent {
      */
     private void exportImage(int atlasID) {
         boolean showMarkers = !state.is(HIDING_MARKERS);
+        int exportStep = tile2ChunkScale;
         state.switchTo(EXPORTING_IMAGE);
         // Default file name is "Atlas <N>.png"
         ExportImageUtil.isExporting = true;
@@ -620,17 +621,19 @@ public class GuiAtlas extends GuiComponent {
 
         try {
             Log.info("Exporting image from Atlas #%d to file %s", atlasID, file.getAbsolutePath());
-            ExportImageUtil.exportPngImage(biomeData, globalMarkersData, localMarkersData, file, showMarkers);
+            ExportImageUtil.exportPngImage(biomeData, globalMarkersData, localMarkersData, file, showMarkers, exportStep);
             Log.info("Finished exporting image");
         } catch (OutOfMemoryError e) {
             Log.warn(e, "Image is too large, trying to export in strips");
             try {
-                ExportImageUtil.exportPngImageTooLarge(biomeData, globalMarkersData, localMarkersData, file, showMarkers);
+                ExportImageUtil.exportPngImageTooLarge(biomeData, globalMarkersData, localMarkersData, file, showMarkers, exportStep);
             } catch (OutOfMemoryError e2) {
-                int minX = (biomeData.getScope().minX - 1) * ExportImageUtil.TILE_SIZE;
-                int minY = (biomeData.getScope().minY - 1) * ExportImageUtil.TILE_SIZE;
-                int outWidth = (biomeData.getScope().maxX + 2) * ExportImageUtil.TILE_SIZE - minX;
-                int outHeight = (biomeData.getScope().maxY + 2) * ExportImageUtil.TILE_SIZE - minY;
+                int alignedMinX = Math.floorDiv(biomeData.getScope().minX, exportStep) * exportStep;
+                int alignedMinY = Math.floorDiv(biomeData.getScope().minY, exportStep) * exportStep;
+                int alignedMaxX = Math.floorDiv(biomeData.getScope().maxX, exportStep) * exportStep;
+                int alignedMaxY = Math.floorDiv(biomeData.getScope().maxY, exportStep) * exportStep;
+                int outWidth = (Math.floorDiv(alignedMaxX - alignedMinX, exportStep) + 3) * ExportImageUtil.TILE_SIZE;
+                int outHeight = (Math.floorDiv(alignedMaxY - alignedMinY, exportStep) + 3) * ExportImageUtil.TILE_SIZE;
 
                 Log.error(e2, "Image is STILL too large, how massive is this map?! Answer: (%dx%d)", outWidth, outHeight);
 
@@ -950,9 +953,12 @@ public class GuiAtlas extends GuiComponent {
         int mapEndZ = MathUtil.roundToBase((int) Math.ceil(((double) MAP_HEIGHT / 2d - mapOffsetY + 2 * tileHalfSize) / mapScale / 16d), tile2ChunkScale);
         int mapStartScreenX = getGuiX() + WIDTH / 2 + (int) ((mapStartX << 4) * mapScale) + mapOffsetX;
         int mapStartScreenY = getGuiY() + HEIGHT / 2 + (int) ((mapStartZ << 4) * mapScale) + mapOffsetY;
-        TileRenderIterator tiles = new TileRenderIterator(biomeData);
-        tiles.setScope(new Rect(mapStartX, mapStartZ, mapEndX, mapEndZ));
-        tiles.setStep(tile2ChunkScale);
+        TileRenderIterator tiles = AtlasClientAPI.getTileAPI().getTiles(
+                player.getCommandSenderWorld(),
+                getAtlasID(),
+                new Rect(mapStartX, mapStartZ, mapEndX, mapEndZ),
+                tile2ChunkScale
+        );
 
         matrices.pose().pushPose();
         matrices.pose().translate(mapStartScreenX, mapStartScreenY, 0);

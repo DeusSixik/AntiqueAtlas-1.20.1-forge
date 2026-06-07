@@ -1,0 +1,7 @@
+{
+    "priority":  70,
+    "piece_type":  "minecraft:nesclt",
+    "setter":  "always",
+    "version":  1,
+    "tile":  "antiqueatlas:nether_wall"
+}

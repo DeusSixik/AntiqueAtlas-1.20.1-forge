@@ -1,0 +1,7 @@
+{
+    "priority":  80,
+    "piece_type":  "minecraft:nebcr",
+    "setter":  "always",
+    "version":  1,
+    "tile":  "antiqueatlas:nether_bridge"
+}

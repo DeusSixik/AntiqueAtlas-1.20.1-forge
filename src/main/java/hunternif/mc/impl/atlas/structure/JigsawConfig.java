@@ -35,23 +35,34 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
         }
     }
 
-    private static StructurePieceTile parseJson(JsonObject json) {
+    private static StructurePieceTile parseJson(JsonObject json, ResourceLocation resourceId) {
         int version = json.getAsJsonPrimitive("version").getAsInt();
 
         if (version == 1) {
             return new StructurePieceTile(
                     ResourceLocation.tryParse(json.get("tile").getAsString()),
-                    json.get("priority").getAsInt()
+                    json.get("priority").getAsInt(),
+                    readSetter(json, "setter", StructureHandler.ALWAYS, resourceId)
             );
         } else if (version == 2) {
             return new StructurePieceTileXZ(
                     ResourceLocation.tryParse(json.get("tile_x").getAsString()),
+                    readSetter(json, "setter_x", readSetter(json, "setter", StructureHandler::IF_X_DIRECTION, resourceId), resourceId),
                     ResourceLocation.tryParse(json.get("tile_z").getAsString()),
+                    readSetter(json, "setter_z", readSetter(json, "setter", StructureHandler::IF_Z_DIRECTION, resourceId), resourceId),
                     json.get("priority").getAsInt()
             );
         } else {
             throw new RuntimeException("Unsupported JSON version: " + version + ". Only version 1 is supported.");
         }
+    }
+
+    private static StructureHandler.Setter readSetter(JsonObject json, String key, StructureHandler.Setter fallback, ResourceLocation resourceId) {
+        if (!json.has(key)) {
+            return fallback;
+        }
+
+        return StructureHandler.setterByName(json.getAsJsonPrimitive(key).getAsString(), resourceId);
     }
 
     @Override
@@ -74,7 +85,7 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
                         );
 
                         JsonObject json = readResource(id.getValue());
-                        pieces.put(piece_id, parseJson(json));
+                        pieces.put(piece_id, parseJson(json, piece_id));
                     } catch (Exception e) {
                         AntiqueAtlas.LOG.warn("Error reading structure piece config from " + id, e);
                     }
@@ -93,14 +104,15 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
     public CompletableFuture<Void> apply(Map<ResourceLocation, StructurePieceTile> pieces, ResourceManager
             manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.runAsync(() -> {
+            StructureHandler.clearJigsawTileRegistrations();
             pieces.forEach((id, piece) -> {
 
                 AntiqueAtlas.LOG.info("Apply structure piece config: " + id);
                 if (piece instanceof StructurePieceTileXZ) {
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileX(), StructureHandler::IF_X_DIRECTION);
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileZ(), StructureHandler::IF_Z_DIRECTION);
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileX(), piece.getSetterX());
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileZ(), piece.getSetterZ());
                 } else {
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTile());
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTile(), piece.getSetter());
                 }
             });
         }, executor);

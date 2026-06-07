@@ -1,7 +1,9 @@
 package hunternif.mc.impl.atlas.util;
 
+import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.client.*;
 import hunternif.mc.impl.atlas.client.gui.ExportUpdateListener;
+import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.core.WorldData;
 import hunternif.mc.impl.atlas.marker.DimensionMarkersData;
 import hunternif.mc.impl.atlas.marker.Marker;
@@ -90,14 +92,15 @@ public class ExportImageUtil {
      * Renders the map into file as PNG image.
      */
     public static void exportPngImage(WorldData biomeData, DimensionMarkersData globalMarkers,
-                                      DimensionMarkersData localMarkers, File file, boolean showMarkers) {
+                                      DimensionMarkersData localMarkers, File file, boolean showMarkers, int step) {
         getListener().setHeaderString("gui.antiqueatlas.export.setup");
+        ExportRenderArea renderArea = ExportRenderArea.from(biomeData.getScope(), step);
         // Prepare output image
         // Leave padding of one row of map tiles on each side
-        int minX = (biomeData.getScope().minX - 1) * TILE_SIZE;
-        int minY = (biomeData.getScope().minY - 1) * TILE_SIZE;
-        int outWidth = (biomeData.getScope().maxX + 2) * TILE_SIZE - minX;
-        int outHeight = (biomeData.getScope().maxY + 2) * TILE_SIZE - minY;
+        int minX = renderArea.minBlockX;
+        int minY = renderArea.minBlockY;
+        int outWidth = renderArea.outWidth;
+        int outHeight = renderArea.outHeight;
         Log.info("Image size: %dx%d", outWidth, outHeight);
         getListener().setStatusString("gui.antiqueatlas.export.makingbuffer", outWidth, outHeight);
         BufferedImage outImage = new BufferedImage(outWidth, outHeight, BufferedImage.TYPE_INT_ARGB);
@@ -150,6 +153,7 @@ public class ExportImageUtil {
                 biomeData, textureImageMap,
                 globalMarkers, localMarkers,
                 showMarkers, minX, minY,
+                renderArea.tileScope, renderArea.step,
                 scale, bg);
 
         try {
@@ -166,14 +170,15 @@ public class ExportImageUtil {
      * Renders the map into file as PNG image stripe by stripe in order to not have a OutOfMemoryError.
      */
     public static void exportPngImageTooLarge(final WorldData biomeData, final DimensionMarkersData globalMarkers,
-                                              final DimensionMarkersData localMarkers, File file, final boolean showMarkers) {
+                                              final DimensionMarkersData localMarkers, File file, final boolean showMarkers, int step) {
         getListener().setHeaderString("");
+        final ExportRenderArea renderArea = ExportRenderArea.from(biomeData.getScope(), step);
         // Prepare output image
         // Leave padding of one row of map tiles on each side
-        final int minX = (biomeData.getScope().minX - 1) * TILE_SIZE;
-        final int minY = (biomeData.getScope().minY - 1) * TILE_SIZE;
-        final int outWidth = (biomeData.getScope().maxX + 2) * TILE_SIZE - minX;
-        final int outHeight = (biomeData.getScope().maxY + 2) * TILE_SIZE - minY;
+        final int minX = renderArea.minBlockX;
+        final int minY = renderArea.minBlockY;
+        final int outWidth = renderArea.outWidth;
+        final int outHeight = renderArea.outHeight;
         Log.info("Image size: %dx%d", outWidth, outHeight);
 
         // Draw background, double scale:
@@ -250,6 +255,7 @@ public class ExportImageUtil {
                     biomeData, textureImageMap,
                     globalMarkers, localMarkers,
                     showMarkers, minX, minY,
+                    renderArea.tileScope, renderArea.step,
                     scale, bg_);
             getListener().setStatusString("gui.antiqueatlas.export.writestripe");
             getListener().setProgressMax(sliceHeight_ * (slice + 1) > outHeight ? outHeight - (sliceHeight_ * slice) : sliceHeight_);
@@ -274,11 +280,64 @@ public class ExportImageUtil {
         return maxMemory - usedMemory; // available memory i.e. Maximum heap size minus the current amount used
     }
 
+    private static TileRenderIterator createTileIterator(WorldData biomeData, Rect scope, int step) {
+        ITileStorage storage = AntiqueAtlas.lodTileAggregationService.createStorage(
+                biomeData,
+                scope,
+                step,
+                biomeData.world.location()
+        );
+        TileRenderIterator iter = new TileRenderIterator(storage);
+        iter.setScope(scope);
+        iter.setStep(step);
+        return iter;
+    }
+
+    private static int alignChunkToStep(int chunk, int step) {
+        return Math.floorDiv(chunk, step) * step;
+    }
+
+    private static int getTileCount(int minChunk, int maxChunk, int step) {
+        return Math.floorDiv(maxChunk - minChunk, step) + 1;
+    }
+
+    private static final class ExportRenderArea {
+        private final Rect tileScope;
+        private final int step;
+        private final int minBlockX;
+        private final int minBlockY;
+        private final int outWidth;
+        private final int outHeight;
+
+        private ExportRenderArea(Rect tileScope, int step, int minBlockX, int minBlockY, int outWidth, int outHeight) {
+            this.tileScope = tileScope;
+            this.step = step;
+            this.minBlockX = minBlockX;
+            this.minBlockY = minBlockY;
+            this.outWidth = outWidth;
+            this.outHeight = outHeight;
+        }
+
+        private static ExportRenderArea from(Rect sourceScope, int requestedStep) {
+            int step = Math.max(1, requestedStep);
+            int minChunkX = alignChunkToStep(sourceScope.minX, step);
+            int minChunkY = alignChunkToStep(sourceScope.minY, step);
+            int maxChunkX = alignChunkToStep(sourceScope.maxX, step);
+            int maxChunkY = alignChunkToStep(sourceScope.maxY, step);
+            Rect tileScope = new Rect(minChunkX, minChunkY, maxChunkX, maxChunkY);
+            int outWidth = (getTileCount(minChunkX, maxChunkX, step) + 2) * TILE_SIZE;
+            int outHeight = (getTileCount(minChunkY, maxChunkY, step) + 2) * TILE_SIZE;
+            int minBlockX = (minChunkX - step) * TILE_SIZE;
+            int minBlockY = (minChunkY - step) * TILE_SIZE;
+            return new ExportRenderArea(tileScope, step, minBlockX, minBlockY, outWidth, outHeight);
+        }
+    }
+
     private static void drawMapToGraphics(Graphics2D graphics,
                                           int bgTilesX, int bgTilesY, int outWidth, int outHeight,
                                           WorldData biomeData, Map<ResourceLocation, BufferedImage> textureImageMap,
                                           DimensionMarkersData globalMarkers, DimensionMarkersData localMarkers,
-                                          boolean showMarkers, int minX, int minY,
+                                          boolean showMarkers, int minX, int minY, Rect tileScope, int step,
                                           int scale, BufferedImage bg) {
         getListener().setStatusString("gui.antiqueatlas.export.rendering.background");
         getListener().setProgressMax(bgTilesX * bgTilesY);
@@ -340,11 +399,12 @@ public class ExportImageUtil {
         getListener().addProgress(1);
 
         //============= Draw actual map tiles ==============
-        Rect scope = biomeData.getScope();
         getListener().setStatusString("gui.antiqueatlas.export.rendering.map");
-        getListener().setProgressMax(scope.getHeight() * scope.getWidth());
+        int tileColumns = getTileCount(tileScope.minX, tileScope.maxX, step);
+        int tileRows = getTileCount(tileScope.minY, tileScope.maxY, step);
+        getListener().setProgressMax(tileColumns * tileRows);
 
-        TileRenderIterator iter = new TileRenderIterator(biomeData);
+        TileRenderIterator iter = createTileIterator(biomeData, tileScope, step);
         while (iter.hasNext()) {
             SubTileQuartet subtiles = iter.next();
             for (SubTile subtile : subtiles) {
@@ -423,8 +483,8 @@ public class ExportImageUtil {
                     if (markerImage == null)
                         continue;
 
-                    int markerX = marker.getX() - minX;
-                    int markerY = marker.getZ() - minY;
+                    int markerX = (int) Math.round((marker.getX() - minX) / (double) step);
+                    int markerY = (int) Math.round((marker.getZ() - minY) / (double) step);
 
                     graphics.drawImage(
                             markerImage,

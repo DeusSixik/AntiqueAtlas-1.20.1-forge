@@ -11,6 +11,7 @@ import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.core.AtlasData;
 import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.core.TileInfo;
+import hunternif.mc.impl.atlas.service.TileSelectionService;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +26,7 @@ public class WorldScanner {
      */
     private final Map<ResourceKey<Level>, ITileDetector> biomeAnalyzers = new HashMap<>();
     private final TileDetectorBase tileDetectorOverworld = new TileDetectorBase();
+    private final TileSelectionService tileSelectionService = new TileSelectionService(this::getBiomeDetectorForWorld, AntiqueAtlas.tileSelectionRules);
 
     public WorldScanner() {
         setBiomeDetectorForWorld(Level.OVERWORLD, tileDetectorOverworld);
@@ -64,9 +66,7 @@ public class WorldScanner {
         int rescanInterval = newScanInterval * AntiqueAtlas.CONFIG.rescanRate;
         boolean rescanRequired = AntiqueAtlas.CONFIG.doRescan && player.getCommandSenderWorld().getGameTime() % rescanInterval == 0;
 
-        ITileDetector biomeDetector = getBiomeDetectorForWorld(player.getCommandSenderWorld().dimension());
-
-        int scanRadius = biomeDetector.getScanRadius();
+        int scanRadius = tileSelectionService.getScanRadius(player.getCommandSenderWorld());
 
         // Look at chunks around in a circular area:
         for (int dx = -scanRadius; dx <= scanRadius; dx++) {
@@ -91,54 +91,35 @@ public class WorldScanner {
         ITileStorage storedData = data.getWorldData(world.dimension());
         ResourceLocation oldTile = storedData.getTile(x, z);
 
-        // Check if there's a custom tile at the location:
-        // Custom tiles overwrite even the chunks already seen.
-        ResourceLocation tile = AtlasAPI.getTileAPI().getGlobalTile(world, x, z);
+        ResourceLocation globalTile = AtlasAPI.getTileAPI().getGlobalTile(world, x, z);
+        if (oldTile != null && !rescanRequired && globalTile == null) {
+            return null;
+        }
 
-        // If there's no custom tile, check the actual chunk:
-        if (tile == null) {
-            // If the chunk has been scanned previously, only re-scan it so often:
-            if (oldTile != null && !rescanRequired) {
-                return null;
-            }
-
-            if(!world.getChunkSource().hasChunk(x,z))
-            {
-                return null;
-            }
-
+        ChunkAccess chunk = null;
+        if (world.getChunkSource().hasChunk(x, z)) {
             // TODO FABRIC: forceChunkLoading crashes here
-            ChunkAccess chunk = world.getChunk(x, z, ChunkStatus.FULL, AntiqueAtlas.CONFIG.forceChunkLoading);
+            chunk = world.getChunk(x, z, ChunkStatus.FULL, AntiqueAtlas.CONFIG.forceChunkLoading);
+        }
 
-            // Skip chunk if it hasn't loaded yet:
-            if (chunk == null) {
-                return null;
-            }
+        if (chunk == null && globalTile == null) {
+            return null;
+        }
 
-            ITileDetector biomeDetector = getBiomeDetectorForWorld(world.dimension());
-            tile = biomeDetector.getBiomeID(world, chunk);
-
-            if (oldTile != null) {
-                if (tile == null) {
-                    // If the new tile is empty, remove the old one:
-                    data.removeTile(world.dimension(), x, z);
-                } else if (!oldTile.equals(tile)) {
-                    // Only update if the old tile's biome ID doesn't match the new one:
-                    data.setTile(world.dimension(), x, z, tile);
-                    return new TileInfo(x, z, tile);
-                }
-            } else {
-                // Scanning new chunk:
-                if (tile != null) {
-                    data.setTile(world.dimension(), x, z, tile);
-                    return new TileInfo(x, z, tile);
-                }
+        ResourceLocation tile = tileSelectionService.selectTile(world, x, z, globalTile, chunk);
+        if (oldTile != null) {
+            if (tile == null) {
+                // If the new tile is empty, remove the old one:
+                data.removeTile(world.dimension(), x, z);
+            } else if (!oldTile.equals(tile)) {
+                // Only update if the old tile's biome ID doesn't match the new one:
+                data.setTile(world.dimension(), x, z, tile);
+                return new TileInfo(x, z, tile);
             }
         } else {
-            // Only update the custom tile if it doesn't rewrite itself:
-            if (oldTile == null || !oldTile.equals(tile)) {
+            // Scanning new chunk:
+            if (tile != null) {
                 data.setTile(world.dimension(), x, z, tile);
-                data.setDirty();
                 return new TileInfo(x, z, tile);
             }
         }

@@ -24,12 +24,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 /**
- * Client-only config mapping biome IDs to texture sets.
+ * Client-only config mapping tile IDs to texture sets and render metadata.
  * <p>Must be loaded after {@link TextureSetConfig}!</p>
  *
  * @author Hunternif
  */
-public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLocation, ResourceLocation>>, ReloadListener {
+public class TileTextureConfig implements ResourceReloadListener<TileTextureConfig.TileTextureConfigData>, ReloadListener {
     public static final ResourceLocation ID = AntiqueAtlas.id("tile_textures");
     private final TileTextureMap tileTextureMap;
     private final TextureSetMap textureSetMap;
@@ -40,9 +40,10 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
     }
 
     @Override
-    public CompletableFuture<Map<ResourceLocation, ResourceLocation>> load(ResourceManager manager, ProfilerFiller profiler, Executor executor) {
+    public CompletableFuture<TileTextureConfigData> load(ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
-            Map<ResourceLocation, ResourceLocation> map = new HashMap<>();
+            Map<ResourceLocation, ResourceLocation> textureMap = new HashMap<>();
+            Map<ResourceLocation, TileMetadata> metadataMap = new HashMap<>();
 
             try {
                 for (Entry<ResourceLocation, Resource> id : manager.listResources("atlas/tiles", (s) -> s.toString().endsWith(".json")).entrySet()) {
@@ -52,15 +53,19 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
                         Resource resource = id.getValue();
                         try (InputStream stream = resource.open(); InputStreamReader reader = new InputStreamReader(stream)) {
                             JsonObject object = JsonParser.parseReader(reader).getAsJsonObject();
+                            TileMetadata metadata = readMetadata(object);
 
                             int version = object.getAsJsonPrimitive("version").getAsInt();
                             if (version == 1) {
                                 ResourceLocation texture_set = VersionHelper.toLoc(object.get("texture_set").getAsString());
 
-                                map.put(tile_id, texture_set);
+                                textureMap.put(tile_id, texture_set);
+                                metadataMap.put(tile_id, metadata);
 
                                 for (TileHeightType layer : TileHeightType.values()) {
-                                    map.put(ResourceLocation.tryParse(tile_id + "_" + layer.getName()), texture_set);
+                                    ResourceLocation layerId = ResourceLocation.tryParse(tile_id + "_" + layer.getName());
+                                    textureMap.put(layerId, texture_set);
+                                    metadataMap.put(layerId, metadata);
                                 }
                             } else if (version == 2) {
                                 ResourceLocation default_entry = TileTextureMap.DEFAULT_TEXTURE;
@@ -71,7 +76,8 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
                                 }
 
                                 // insert the old-style texture set with the default one
-                                map.put(tile_id, default_entry);
+                                textureMap.put(tile_id, default_entry);
+                                metadataMap.put(tile_id, metadata);
 
                                 for (TileHeightType layer : TileHeightType.values()) {
                                     ResourceLocation texture_set = default_entry;
@@ -81,7 +87,9 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
                                     } catch (Exception ignored) {
                                     }
 
-                                    map.put(ResourceLocation.tryParse(tile_id + "_" + layer), texture_set);
+                                    ResourceLocation layerId = ResourceLocation.tryParse(tile_id + "_" + layer);
+                                    textureMap.put(layerId, texture_set);
+                                    metadataMap.put(layerId, metadata);
                                 }
                             } else {
                                 AntiqueAtlas.LOG.warn("The tile " + tile_id + " is in the wrong version! Skipping.");
@@ -95,14 +103,15 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
                 Log.warn(e, "Failed to read tile mappings!");
             }
 
-            return map;
+            return new TileTextureConfigData(textureMap, metadataMap);
         }, executor);
     }
 
     @Override
-    public CompletableFuture<Void> apply(Map<ResourceLocation, ResourceLocation> tileMap, ResourceManager manager, ProfilerFiller profiler, Executor executor) {
+    public CompletableFuture<Void> apply(TileTextureConfigData tileData, ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.runAsync(() -> {
-            for (Map.Entry<ResourceLocation, ResourceLocation> entry : tileMap.entrySet()) {
+            tileTextureMap.clear();
+            for (Map.Entry<ResourceLocation, ResourceLocation> entry : tileData.textureSets().entrySet()) {
                 ResourceLocation tile_id = entry.getKey();
                 ResourceLocation texture_set = entry.getValue();
                 TextureSet set = textureSetMap.getByName(entry.getValue());
@@ -114,11 +123,37 @@ public class TileTextureConfig implements ResourceReloadListener<Map<ResourceLoc
                 }
 
                 tileTextureMap.setTexture(entry.getKey(), set);
+                tileTextureMap.setMetadata(entry.getKey(), tileData.metadata().get(entry.getKey()));
                 if (AntiqueAtlas.CONFIG.resourcePackLogging)
                     Log.info("Loaded tile %s with texture set %s", tile_id, set.name);
             }
         }, executor);
     }
+
+    private TileMetadata readMetadata(JsonObject object) {
+        JsonObject lod = object.getAsJsonObject("lod");
+        if (lod == null) {
+            return TileMetadata.DEFAULT;
+        }
+
+        ResourceLocation lodGroup = null;
+        if (lod.has("group")) {
+            lodGroup = VersionHelper.toLoc(lod.get("group").getAsString());
+        }
+
+        int lodPriority = lod.has("priority") ? lod.get("priority").getAsInt() : 0;
+        int lodMinCount = lod.has("min_count") ? lod.get("min_count").getAsInt() : 1;
+        if (lodGroup == null && lodPriority == 0 && lodMinCount == 1) {
+            return TileMetadata.DEFAULT;
+        }
+
+        return new TileMetadata(lodGroup, lodPriority, Math.max(1, lodMinCount));
+    }
+
+    public record TileTextureConfigData(
+            Map<ResourceLocation, ResourceLocation> textureSets,
+            Map<ResourceLocation, TileMetadata> metadata
+    ) {}
     
     @Override
     public ResourceLocation id() {

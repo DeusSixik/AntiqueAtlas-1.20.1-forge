@@ -1,4 +1,8 @@
 {
 	"version": 1,
-	"texture_set": "antiqueatlas:hut"
+	"texture_set": "antiqueatlas:hut",
+	"lod": {
+		"group": "antiqueatlas:village",
+		"priority": 50
+	}
 }

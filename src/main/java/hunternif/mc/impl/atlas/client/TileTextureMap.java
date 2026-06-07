@@ -42,6 +42,12 @@ public class TileTextureMap {
      * This map stores the pseudo biome texture mappings, any biome with ID <0 is assumed to be a pseudo biome
      */
     private final Map<ResourceLocation, TextureSet> textureMap = new HashMap<>();
+    private final Map<ResourceLocation, TileMetadata> metadataMap = new HashMap<>();
+
+    public void clear() {
+        textureMap.clear();
+        metadataMap.clear();
+    }
 
     /**
      * Assign texture set to pseudo biome
@@ -59,6 +65,17 @@ public class TileTextureMap {
         textureMap.put(tileId, textureSet);
     }
 
+    public void setMetadata(ResourceLocation tileId, TileMetadata metadata) {
+        if (tileId == null) return;
+
+        if (metadata == null || TileMetadata.DEFAULT.equals(metadata)) {
+            metadataMap.remove(tileId);
+            return;
+        }
+
+        metadataMap.put(tileId, metadata);
+    }
+
     /**
      * Assign the same texture set to all height variations of the tileId
      */
@@ -67,6 +84,14 @@ public class TileTextureMap {
 
         for (TileHeightType layer : TileHeightType.values()) {
             setTexture(ResourceLocation.tryParse(tileId + "_" + layer), textureSet);
+        }
+    }
+
+    public void setAllMetadata(ResourceLocation tileId, TileMetadata metadata) {
+        setMetadata(tileId, metadata);
+
+        for (TileHeightType layer : TileHeightType.values()) {
+            setMetadata(ResourceLocation.tryParse(tileId + "_" + layer), metadata);
         }
     }
 
@@ -299,6 +324,26 @@ public class TileTextureMap {
         }
 
         return textureMap.getOrDefault(tile, getDefaultTexture());
+    }
+
+    public TileMetadata getMetadata(ResourceLocation tile) {
+        if (tile == null) {
+            return TileMetadata.DEFAULT;
+        }
+
+        return metadataMap.getOrDefault(tile, TileMetadata.DEFAULT);
+    }
+
+    public ResourceLocation getLodGroup(ResourceLocation tile) {
+        return getMetadata(tile).lodGroup();
+    }
+
+    public int getLodPriority(ResourceLocation tile) {
+        return getMetadata(tile).lodPriority();
+    }
+
+    public int getLodMinCount(ResourceLocation tile) {
+        return getMetadata(tile).lodMinCount();
     }
 
     public ITexture getTexture(SubTile subTile) {

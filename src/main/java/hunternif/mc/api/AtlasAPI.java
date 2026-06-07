@@ -1,10 +1,7 @@
 package hunternif.mc.api;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.stereowalker.unionlib.util.RegistryHelper;
 import com.stereowalker.unionlib.util.VersionHelper;
@@ -12,11 +9,8 @@ import com.stereowalker.unionlib.util.VersionHelper;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.api.impl.MarkerApiImpl;
 import hunternif.mc.impl.atlas.api.impl.TileApiImpl;
-import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
-import hunternif.mc.impl.atlas.item.AtlasItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * Use this class to obtain a reference to the APIs.
@@ -55,33 +49,11 @@ public class AtlasAPI {
     }
 
     /**
-     * Convenience method that returns a list of atlas IDs for all atlas items
-     * the player is currently carrying.
+     * Convenience method that returns a list of atlas IDs that are currently
+     * active for the player, including the built-in atlas when enabled.
      **/
     public static List<Integer> getPlayerAtlases(Player player) {
-        Set<Integer> atlasIds = new LinkedHashSet<>();
-
-        if (AtlasIdentityService.isPlayerAtlasEnabled()) {
-            atlasIds.add(AtlasIdentityService.getOrCreatePlayerAtlasId(player));
-        }
-
-        if (AtlasIdentityService.isItemAtlasEnabled()) {
-            for (ItemStack stack : player.getInventory().items) {
-                if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
-                    atlasIds.add(AtlasItem.getAtlasID(stack));
-                }
-            }
-            for (ItemStack stack : player.getInventory().offhand) {
-                if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
-                    atlasIds.add(AtlasItem.getAtlasID(stack));
-                }
-            }
-        }
-
-        if (atlasIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return new ArrayList<>(atlasIds);
+        List<Integer> atlasIds = AntiqueAtlas.activeAtlasResolver.getActiveAtlasIds(player);
+        return atlasIds.isEmpty() ? Collections.emptyList() : atlasIds;
     }
 }
