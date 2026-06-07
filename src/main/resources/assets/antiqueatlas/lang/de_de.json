@@ -46,6 +46,8 @@
 
   "text.autoconfig.antiqueatlas.option.doSaveBrowsingPos": "Speichere Position im Atlas",
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Todesmarkierungen",
+  "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Todesmarkierungen anzeigen",
+  "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Limit für Todesmarkierungen",
   "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Markierungen für Dörfer",
   "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Markierungen für Nether Portale",
   "text.autoconfig.antiqueatlas.option.itemNeeded": "Atlas wird benötigt",

@@ -47,6 +47,8 @@
 
   "text.autoconfig.antiqueatlas.option.doSaveBrowsingPos": "Сохранить позицию",
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Метка смерти",
+  "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Показывать метки смерти",
+  "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Лимит меток смерти",
   "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Метка деревни",
   "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Метка портала в Нижний Мир",
   "text.autoconfig.antiqueatlas.option.itemNeeded": "Для использования необходим атлас",
