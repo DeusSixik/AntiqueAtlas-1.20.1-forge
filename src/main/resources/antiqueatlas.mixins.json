@@ -11,6 +11,7 @@
   "client": [
     "GlDebugMixin",
     "HeldItemRendererMixin",
+    "InventoryScreenMixin",
     "MinecraftClientMixin",
     "MixinEntity",
     "MixinPlayerEntityDeath"

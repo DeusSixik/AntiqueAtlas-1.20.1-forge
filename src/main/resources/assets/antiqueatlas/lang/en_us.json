@@ -9,6 +9,7 @@
   "gui.antiqueatlas.exportImage": "Export image",
   "gui.antiqueatlas.hideMarkers": "Hide markers",
   "gui.antiqueatlas.showMarkers": "Show markers",
+  "gui.antiqueatlas.openPlayerAtlas": "Open built-in atlas",
 
   "gui.antiqueatlas.marker.label": "Label:",
   "gui.antiqueatlas.marker.type": "Type:",

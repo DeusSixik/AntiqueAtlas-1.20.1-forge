@@ -32,20 +32,32 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
     }
 
     public static void openAtlasGUI(ItemStack stack) {
-        openAtlasGUI(getAtlasGUI().prepareToOpen(stack));
+        openAtlasScreen(getAtlasGUI().prepareToOpen(stack));
     }
 
     public static void openAtlasGUI() {
         if (!AtlasIdentityService.isPlayerAtlasEnabled()) {
             return;
         }
-        openAtlasGUI(getAtlasGUI().prepareToOpen());
+        openAtlasScreen(getAtlasGUI().prepareToOpen());
     }
 
-    private static void openAtlasGUI(GuiAtlas gui) {
+    public static void openAtlasLayer() {
+        if (!AtlasIdentityService.isPlayerAtlasEnabled()) {
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen == null) { // In-game screen
-            guiAtlas.updateL18n();
+        if (mc.screen != null) {
+            GuiAtlas gui = getAtlasGUI().prepareToOpen();
+            gui.updateL18n();
+            mc.pushGuiLayer(gui);
+        }
+    }
+
+    private static void openAtlasScreen(GuiAtlas gui) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null) {
+            gui.updateL18n();
             mc.setScreen(gui);
         }
     }
