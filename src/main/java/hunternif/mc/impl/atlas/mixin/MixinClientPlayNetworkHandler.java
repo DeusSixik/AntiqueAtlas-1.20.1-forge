@@ -1,5 +1,6 @@
 package hunternif.mc.impl.atlas.mixin;
 
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.mixinhooks.NewServerConnectionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -17,6 +18,7 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(at = @At("RETURN"), method = "onGameJoin")
     public void afterGameJoin(ClientboundLoginPacket packet, CallbackInfo info) {
+        AtlasIdentityService.clearClientState();
 //        NewServerConnectionCallback.EVENT.invoker().onNewConnection(!client.hasSingleplayerServer());
     }
 }

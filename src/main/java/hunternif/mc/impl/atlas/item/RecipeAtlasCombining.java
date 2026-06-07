@@ -106,7 +106,7 @@ public class RecipeAtlasCombining extends CustomRecipe {
     public ItemStack onCrafted(Level world, Container inventory, ItemStack result) {
         if (world.isClientSide) return result;
         // Until the first update, on the client the returned atlas ID is the same as the first Atlas on the crafting grid.
-        int atlasID = AntiqueAtlas.getAtlasIdData(world).getNextAtlasId();
+        int atlasID = AntiqueAtlas.getAtlasDirectoryData(world).getNextAtlasId();
 
         AtlasData destBiomes = AntiqueAtlas.tileData.getData(atlasID, world);
         destBiomes.setDirty();

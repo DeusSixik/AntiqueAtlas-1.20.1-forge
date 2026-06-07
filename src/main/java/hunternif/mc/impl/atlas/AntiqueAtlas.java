@@ -22,6 +22,7 @@ import hunternif.mc.impl.atlas.core.TileDataHandler;
 import hunternif.mc.impl.atlas.core.scaning.TileDetectorBase;
 import hunternif.mc.impl.atlas.core.scaning.WorldScanner;
 //import hunternif.mc.impl.atlas.event.RecipeCraftedHandler;
+import hunternif.mc.impl.atlas.identity.AtlasDirectoryData;
 import hunternif.mc.impl.atlas.item.AntiqueAtlasItems;
 import hunternif.mc.impl.atlas.marker.GlobalMarkersDataHandler;
 import hunternif.mc.impl.atlas.marker.MarkersDataHandler;
@@ -36,6 +37,7 @@ import hunternif.mc.impl.atlas.network.packet.s2c.play.MapDataS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutGlobalTileS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutTileS2CPacket;
+import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncPlayerAtlasIdS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.TileGroupsS2CPacket;
 import hunternif.mc.impl.atlas.structure.EndCity;
 import hunternif.mc.impl.atlas.structure.JigsawConfig;
@@ -86,6 +88,15 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
         }
 
         return ((ServerLevel) world).getDataStorage().computeIfAbsent(AtlasIdData::fromNbt, AtlasIdData::new, "antiqueatlas_global_atlas_data");
+    }
+
+    public static AtlasDirectoryData getAtlasDirectoryData(Level world) {
+        if (world.isClientSide()) {
+            LOG.warn("Tried to access server only data from client.");
+            return null;
+        }
+
+        return ((ServerLevel) world).getDataStorage().computeIfAbsent(AtlasDirectoryData::fromNbt, AtlasDirectoryData::new, "antiqueatlas_atlas_directory");
     }
     
     @Override
@@ -151,7 +162,9 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
     
     @Override
     public void populateCreativeTabs(CreativeTabPopulator populator) {
-    	if (populator.isToolTab()) populator.addItems(AntiqueAtlasItems.Items.EMPTY_ATLAS);
+    	if (AntiqueAtlas.CONFIG.enableItemAtlas && populator.isToolTab()) {
+    		populator.addItems(AntiqueAtlasItems.Items.EMPTY_ATLAS);
+    	}
     }
     
     @Override
@@ -161,7 +174,7 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
     
     @Override
     public void setupRegistries(RegistryCollector collector) {
-    	if (AntiqueAtlas.CONFIG.itemNeeded) {    		
+    	if (AntiqueAtlas.CONFIG.enableItemAtlas) {
     		collector.addRegistryHolder(Registries.ITEM, AntiqueAtlasItems.Items.class);
     		collector.addRegistryHolder(Registries.RECIPE_SERIALIZER, AntiqueAtlasItems.Recipes.class);
 //    		collector.addRegistryHolder(Registries.DATA_COMPONENT_TYPE, AntiqueAtlasItems.Components.class);
@@ -177,6 +190,7 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 		collector.registerClientboundPacket(MapDataS2CPacket.ID, MapDataS2CPacket.class, MapDataS2CPacket::new);
 		collector.registerClientboundPacket(PutMarkersS2CPacket.ID, PutMarkersS2CPacket.class, PutMarkersS2CPacket::new);
 		collector.registerClientboundPacket(PutTileS2CPacket.ID, PutTileS2CPacket.class, PutTileS2CPacket::new);
+		collector.registerClientboundPacket(SyncPlayerAtlasIdS2CPacket.ID, SyncPlayerAtlasIdS2CPacket.class, SyncPlayerAtlasIdS2CPacket::new);
 		collector.registerClientboundPacket(TileGroupsS2CPacket.ID, TileGroupsS2CPacket.class, TileGroupsS2CPacket::new);
 		
 		collector.registerServerboundPacket(PutMarkerC2SPacket.ID, PutMarkerC2SPacket.class, PutMarkerC2SPacket::new);

@@ -29,10 +29,15 @@ public class AntiqueAtlasConfig implements ConfigObject {
     @UnionConfig.Comment(comment = {"Whether to add global markers for Nether Portals."})
     public boolean autoNetherPortalMarkers = true;
 
-    @UnionConfig.Entry(group = "Gameplay", name = "itemNeeded", 
-    		translatable = "text.autoconfig.antiqueatlas.option.itemNeeded", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Player will need to craft atlas item to use atlas."})
-    public boolean itemNeeded = true;
+    @UnionConfig.Entry(group = "Gameplay", name = "enableItemAtlas",
+    		translatable = "text.autoconfig.antiqueatlas.option.enableItemAtlas", side = ConfigSide.Shared)
+    @UnionConfig.Comment(comment = {"If true, atlas exists as an item and can be crafted, carried and opened from inventory."})
+    public boolean enableItemAtlas = true;
+
+    @UnionConfig.Entry(group = "Gameplay", name = "enablePlayerAtlas",
+    		translatable = "text.autoconfig.antiqueatlas.option.enablePlayerAtlas", side = ConfigSide.Shared)
+    @UnionConfig.Comment(comment = {"If true, each player has a built-in atlas that can be opened without carrying an atlas item."})
+    public boolean enablePlayerAtlas = false;
 
     @UnionConfig.Entry(group = "Gameplay", name = "minimap", 
     		translatable = "text.autoconfig.antiqueatlas.option.minimap", side = ConfigSide.Shared)

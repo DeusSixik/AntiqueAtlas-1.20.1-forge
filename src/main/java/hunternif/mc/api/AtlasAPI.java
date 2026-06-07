@@ -2,7 +2,9 @@ package hunternif.mc.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.stereowalker.unionlib.util.RegistryHelper;
 import com.stereowalker.unionlib.util.VersionHelper;
@@ -10,6 +12,7 @@ import com.stereowalker.unionlib.util.VersionHelper;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.api.impl.MarkerApiImpl;
 import hunternif.mc.impl.atlas.api.impl.TileApiImpl;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.item.AtlasItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -56,22 +59,29 @@ public class AtlasAPI {
      * the player is currently carrying.
      **/
     public static List<Integer> getPlayerAtlases(Player player) {
-        if (!AntiqueAtlas.CONFIG.itemNeeded) {
-            return Collections.singletonList(player.getUUID().hashCode());
+        Set<Integer> atlasIds = new LinkedHashSet<>();
+
+        if (AtlasIdentityService.isPlayerAtlasEnabled()) {
+            atlasIds.add(AtlasIdentityService.getOrCreatePlayerAtlasId(player));
         }
 
-        List<Integer> list = new ArrayList<>();
-        for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
-                list.add(AtlasItem.getAtlasID(stack));
+        if (AtlasIdentityService.isItemAtlasEnabled()) {
+            for (ItemStack stack : player.getInventory().items) {
+                if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
+                    atlasIds.add(AtlasItem.getAtlasID(stack));
+                }
             }
-        }
-        for (ItemStack stack : player.getInventory().offhand) {
-            if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
-                list.add(AtlasItem.getAtlasID(stack));
+            for (ItemStack stack : player.getInventory().offhand) {
+                if (!stack.isEmpty() && stack.getItem() instanceof AtlasItem) {
+                    atlasIds.add(AtlasItem.getAtlasID(stack));
+                }
             }
         }
 
-        return list;
+        if (atlasIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return new ArrayList<>(atlasIds);
     }
 }

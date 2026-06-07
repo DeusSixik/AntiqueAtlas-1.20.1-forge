@@ -6,13 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
-import hunternif.mc.impl.atlas.item.AtlasItem;
 import hunternif.mc.impl.atlas.mixinhooks.EntityHooksAA;
 import hunternif.mc.impl.atlas.registry.MarkerType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
@@ -94,15 +92,8 @@ public class NetherPortalWatcher {
 		// We need the very specific dimension each time.
 		Level world = player.getCommandSenderWorld();
 
-		if (!AntiqueAtlas.CONFIG.itemNeeded) {
-			addPortalMarkerIfNone(player, world, player.getUUID().hashCode());
-			return;
-		}
-
-		for (ItemStack stack : player.getInventory().items) {
-			if (stack == null || !(stack.getItem() instanceof AtlasItem)) continue;
-
-			addPortalMarkerIfNone(player, world, AtlasItem.getAtlasID(stack));
+		for (int atlasID : AtlasAPI.getPlayerAtlases(player)) {
+			addPortalMarkerIfNone(player, world, atlasID);
 		}
 	}
 

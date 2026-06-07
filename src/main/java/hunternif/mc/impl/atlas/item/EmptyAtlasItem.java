@@ -27,7 +27,7 @@ public class EmptyAtlasItem extends Item {
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
         }
 
-        int atlasID = AntiqueAtlas.getAtlasIdData(world).getNextAtlasId();
+        int atlasID = AntiqueAtlas.getAtlasDirectoryData(world).getNextAtlasId();
         ItemStack atlasStack = AntiqueAtlasItems.getAtlasFromId(atlasID);
 
         AtlasData atlasData = AntiqueAtlas.tileData.getData(atlasID, world);

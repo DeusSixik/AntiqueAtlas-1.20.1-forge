@@ -49,6 +49,8 @@
   "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Markierungen für Dörfer",
   "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Markierungen für Nether Portale",
   "text.autoconfig.antiqueatlas.option.itemNeeded": "Atlas wird benötigt",
+  "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Atlas-Gegenstand aktivieren",
+  "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Integrierten Spieleratlas aktivieren",
 
   "text.autoconfig.antiqueatlas.option.doScaleMarkers": "Skaliere Markierungen",
   "text.autoconfig.antiqueatlas.option.defaultScale": "Standard Zoomfaktor",

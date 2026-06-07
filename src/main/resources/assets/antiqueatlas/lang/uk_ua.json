@@ -50,6 +50,8 @@
   "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Мітка села",
   "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Мітка порталу в Незер",
   "text.autoconfig.antiqueatlas.option.itemNeeded": "Для використання необхідний атлас",
+  "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Увімкнути атлас-предмет",
+  "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Увімкнути вбудований атлас гравця",
 
   "text.autoconfig.antiqueatlas.option.doScaleMarkers": "Масштабувати мітки",
   "text.autoconfig.antiqueatlas.option.defaultScale": "Типовий рівень масштабування",

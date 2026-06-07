@@ -13,7 +13,7 @@ import hunternif.mc.impl.atlas.client.texture.TileTexture;
 import hunternif.mc.impl.atlas.core.WorldData;
 import hunternif.mc.impl.atlas.event.MarkerClickedCallback;
 import hunternif.mc.impl.atlas.event.MarkerHoveredCallback;
-import hunternif.mc.impl.atlas.item.AtlasItem;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.marker.DimensionMarkersData;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.OptionalInt;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -278,7 +279,7 @@ public class GuiAtlas extends GuiComponent {
     // Misc stuff ==============================================================
 
     private Player player;
-    private ItemStack stack;
+    private ItemStack stack = ItemStack.EMPTY;
     private WorldData biomeData;
 
     /**
@@ -345,7 +346,7 @@ public class GuiAtlas extends GuiComponent {
         };
         addChild(btnExportPng).offsetGuiCoords(300, 75);
         btnExportPng.addListener(button -> {
-            if (stack != null || !AntiqueAtlas.CONFIG.itemNeeded) {
+            if (hasAccessibleAtlas()) {
                 exportThread = new Thread(() -> exportImage(getAtlasID()), "Atlas file export thread");
                 exportThread.start();
             }
@@ -357,7 +358,7 @@ public class GuiAtlas extends GuiComponent {
             if (state.is(PLACING_MARKER)) {
                 selectedButton = null;
                 state.switchTo(NORMAL);
-            } else if (stack != null || !AntiqueAtlas.CONFIG.itemNeeded) {
+            } else if (hasAccessibleAtlas()) {
                 selectedButton = button;
                 state.switchTo(PLACING_MARKER);
 
@@ -391,7 +392,7 @@ public class GuiAtlas extends GuiComponent {
             if (state.is(DELETING_MARKER)) {
                 selectedButton = null;
                 state.switchTo(NORMAL);
-            } else if (stack != null || !AntiqueAtlas.CONFIG.itemNeeded) {
+            } else if (hasAccessibleAtlas()) {
                 selectedButton = button;
                 state.switchTo(DELETING_MARKER);
             }
@@ -402,7 +403,7 @@ public class GuiAtlas extends GuiComponent {
             selectedButton = null;
             if (state.is(HIDING_MARKERS)) {
                 state.switchTo(NORMAL);
-            } else if (stack != null || !AntiqueAtlas.CONFIG.itemNeeded) {
+            } else if (hasAccessibleAtlas()) {
                 selectedButton = null;
                 state.switchTo(HIDING_MARKERS);
             }
@@ -425,7 +426,7 @@ public class GuiAtlas extends GuiComponent {
     public GuiAtlas prepareToOpen(ItemStack stack) {
         this.stack = stack;
 
-        return prepareToOpen();
+        return prepareToOpenInternal();
     }
 
     public void openMarkerFinalizer(Component name) {
@@ -455,11 +456,16 @@ public class GuiAtlas extends GuiComponent {
     }
 
     public GuiAtlas prepareToOpen() {
+        this.stack = ItemStack.EMPTY;
+        return prepareToOpenInternal();
+    }
+
+    private GuiAtlas prepareToOpenInternal() {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
 
         this.player = Minecraft.getInstance().player;
         updateAtlasData();
-        if (!followPlayer && AntiqueAtlas.CONFIG.doSaveBrowsingPos) {
+        if (biomeData != null && !followPlayer && AntiqueAtlas.CONFIG.doSaveBrowsingPos) {
             loadSavedBrowsingPosition();
         }
 
@@ -786,15 +792,21 @@ public class GuiAtlas extends GuiComponent {
      * {@link #globalMarkersData}
      */
     private void updateAtlasData() {
-        int atlasID = getAtlasID();
+        OptionalInt atlasID = resolveAtlasID();
+        if (atlasID.isEmpty()) {
+            biomeData = null;
+            globalMarkersData = null;
+            localMarkersData = null;
+            return;
+        }
 
         biomeData = AntiqueAtlas.tileData
-                .getData(atlasID, player.getCommandSenderWorld())
+                .getData(atlasID.getAsInt(), player.getCommandSenderWorld())
                 .getWorldData(player.getCommandSenderWorld().dimension());
         globalMarkersData = AntiqueAtlas.globalMarkersData.getData()
                 .getMarkersDataInWorld(player.getCommandSenderWorld().dimension());
         MarkersData markersData = AntiqueAtlas.markersData
-                .getMarkersData(atlasID, player.getCommandSenderWorld());
+                .getMarkersData(atlasID.getAsInt(), player.getCommandSenderWorld());
         if (markersData != null) {
             localMarkersData = markersData
                     .getMarkersDataInWorld(player.getCommandSenderWorld().dimension());
@@ -915,7 +927,7 @@ public class GuiAtlas extends GuiComponent {
 //        RenderSystem.alphaFunc(GL11.GL_GREATER, 0); // So light detail on tiles is visible
         Textures.BOOK.draw(matrices, getGuiX(), getGuiY());
 
-        if ((stack == null && AntiqueAtlas.CONFIG.itemNeeded) || biomeData == null)
+        if (!hasAccessibleAtlas() || biomeData == null)
             return;
 
         if (state.is(DELETING_MARKER)) {
@@ -1187,9 +1199,10 @@ public class GuiAtlas extends GuiComponent {
         markerFinalizer.closeChild();
         removeChild(blinkingIcon);
         // Keyboard.enableRepeatEvents(false);
-        biomeData.setBrowsingPosition(mapOffsetX, mapOffsetY, mapScale);
-
-        new PutBrowsingPositionC2SPacket(getAtlasID(), player.getCommandSenderWorld().dimension(), mapOffsetX, mapOffsetY, mapScale).send();
+        if (biomeData != null && hasAccessibleAtlas()) {
+            biomeData.setBrowsingPosition(mapOffsetX, mapOffsetY, mapScale);
+            new PutBrowsingPositionC2SPacket(getAtlasID(), player.getCommandSenderWorld().dimension(), mapOffsetX, mapOffsetY, mapScale).send();
+        }
     }
 
     /**
@@ -1241,10 +1254,15 @@ public class GuiAtlas extends GuiComponent {
         return 1;
     }
 
-    /**
-     * Returns atlas id based on "itemNeeded" option
-     */
     private int getAtlasID() {
-        return AntiqueAtlas.CONFIG.itemNeeded ? AtlasItem.getAtlasID(stack) : player.getUUID().hashCode();
+        return resolveAtlasID().orElseThrow(() -> new IllegalStateException("No accessible atlas is available"));
+    }
+
+    private boolean hasAccessibleAtlas() {
+        return resolveAtlasID().isPresent();
+    }
+
+    private OptionalInt resolveAtlasID() {
+        return AtlasIdentityService.resolveAtlasId(player, stack);
     }
 }

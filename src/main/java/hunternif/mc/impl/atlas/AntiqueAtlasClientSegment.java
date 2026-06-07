@@ -13,6 +13,7 @@ import hunternif.mc.impl.atlas.client.KeyHandler;
 import hunternif.mc.impl.atlas.client.OverlayRenderer;
 import hunternif.mc.impl.atlas.client.gui.ExportProgressOverlay;
 import hunternif.mc.impl.atlas.client.gui.GuiAtlas;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +36,9 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
     }
 
     public static void openAtlasGUI() {
+        if (!AtlasIdentityService.isPlayerAtlasEnabled()) {
+            return;
+        }
         openAtlasGUI(getAtlasGUI().prepareToOpen());
     }
 
@@ -53,7 +57,7 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
 	
 	@Override
 	public void setupKeymappings(KeyMappingCollector collector) {
-		if (!AntiqueAtlas.CONFIG.itemNeeded) {
+		if (AtlasIdentityService.isPlayerAtlasEnabled()) {
 			collector.addKeyMapping(KeyHandler.ATLAS_KEYMAPPING);
 		}
 	}
@@ -66,7 +70,7 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
 	@Override
 	public void registerInserts(InsertCollector collector) {
 		collector.addInsert(ClientInserts.CLIENT_TICK_FINISH, ()->{
-			if (!AntiqueAtlas.CONFIG.itemNeeded) {
+			if (AtlasIdentityService.isPlayerAtlasEnabled()) {
 				KeyHandler.onClientTick(Minecraft.getInstance());
 			}
 		});
