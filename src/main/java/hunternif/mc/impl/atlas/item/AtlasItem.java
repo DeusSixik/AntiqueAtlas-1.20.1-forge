@@ -3,6 +3,7 @@ package hunternif.mc.impl.atlas.item;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.AntiqueAtlasClientSegment;
 import hunternif.mc.impl.atlas.core.AtlasData;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -33,7 +34,7 @@ public class AtlasItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(this.getDescriptionId(), getAtlasID(stack));
+        return AtlasIdentityService.getDefaultAtlasName(getAtlasID(stack));
     }
 
     @Override
@@ -75,6 +76,7 @@ public class AtlasItem extends Item {
 
         Player player = (Player) entity;
         if (!world.isClientSide) {
+            AtlasIdentityService.syncAtlasNameFromStack(stack, world);
             AntiqueAtlas.atlasScanService.syncAtlasToPlayer((net.minecraft.server.level.ServerPlayer) player, atlasId);
         }
     }

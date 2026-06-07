@@ -10,6 +10,7 @@ import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.registry.MarkerRenderInfo;
 import hunternif.mc.impl.atlas.registry.MarkerType;
+import hunternif.mc.impl.atlas.service.DeathMarkerService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -458,6 +459,9 @@ public class ExportImageUtil {
                 }
 
                 for (Marker marker : markers) {
+                    if (!DeathMarkerService.shouldDisplay(marker)) {
+                        continue;
+                    }
                     MarkerType type = MarkerType.REGISTRY.get(marker.getType());
                     if (type == null) {
                         Log.warn("Could not find marker data for type: %s\n", marker.getType());

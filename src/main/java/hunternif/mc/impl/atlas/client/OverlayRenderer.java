@@ -19,6 +19,7 @@ import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.registry.MarkerRenderInfo;
 import hunternif.mc.impl.atlas.registry.MarkerType;
+import hunternif.mc.impl.atlas.service.DeathMarkerService;
 import hunternif.mc.impl.atlas.util.Rect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -171,6 +172,9 @@ public class OverlayRenderer {
                 if (markers == null)
                     continue;
                 for (Marker marker : markers) {
+                    if (!DeathMarkerService.shouldDisplay(marker)) {
+                        continue;
+                    }
                     float relativeChunkPositionX = (float) (marker.getChunkX()
                             - chunkPosition.x);
                     float relativeChunkPositionY = (float) (marker.getChunkZ()

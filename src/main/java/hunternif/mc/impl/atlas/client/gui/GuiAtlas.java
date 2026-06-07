@@ -22,6 +22,7 @@ import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutBrowsingPositionC2SPacket;
 import hunternif.mc.impl.atlas.registry.MarkerRenderInfo;
 import hunternif.mc.impl.atlas.registry.MarkerType;
+import hunternif.mc.impl.atlas.service.DeathMarkerService;
 import hunternif.mc.impl.atlas.util.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -529,7 +530,7 @@ public class GuiAtlas extends GuiComponent {
 
         int contentY = 0;
         for (Marker marker : localMarkersData.getAllMarkers()) {
-            if (!marker.isVisibleAhead() || marker.isGlobal()) {
+            if (!marker.isVisibleAhead() || marker.isGlobal() || !DeathMarkerService.shouldDisplay(marker)) {
                 continue;
             }
             GuiMarkerBookmark bookmark = new GuiMarkerBookmark(marker);
@@ -1371,6 +1372,9 @@ public class GuiAtlas extends GuiComponent {
                 List<Marker> markers = markersData.getMarkersAtChunk(x, z);
                 if (markers == null) continue;
                 for (Marker marker : markers) {
+                    if (!DeathMarkerService.shouldDisplay(marker)) {
+                        continue;
+                    }
                     renderMarker(matrices, marker, getIconScale());
                 }
             }

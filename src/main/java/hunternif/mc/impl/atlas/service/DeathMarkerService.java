@@ -8,14 +8,26 @@ import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 public class DeathMarkerService {
     public static final int DEFAULT_DEATH_MARKER_LIMIT = 5;
     private static final ResourceLocation TOMB_MARKER_ID = AntiqueAtlas.id("tomb");
+
+    public static boolean isDeathMarker(Marker marker) {
+        return marker != null && isDeathMarker(marker.getType());
+    }
+
+    public static boolean isDeathMarker(ResourceLocation markerType) {
+        return TOMB_MARKER_ID.equals(markerType);
+    }
+
+    public static boolean shouldDisplay(Marker marker) {
+        return !isDeathMarker(marker) || AntiqueAtlas.CONFIG.showDeathMarkers;
+    }
 
     public void trimExcessDeathMarkers(Level world, int atlasId) {
         if (!(world instanceof ServerLevel serverLevel)) {

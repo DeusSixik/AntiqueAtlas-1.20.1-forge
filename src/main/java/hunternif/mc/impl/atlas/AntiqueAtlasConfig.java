@@ -19,6 +19,11 @@ public class AntiqueAtlasConfig implements ConfigObject {
     @UnionConfig.Comment(comment = {"Whether to add local marker for the spot where the player died."})
 	public boolean autoDeathMarker = true;
 
+    @UnionConfig.Entry(group = "Gameplay", name = "showDeathMarkers",
+    		translatable = "text.autoconfig.antiqueatlas.option.showDeathMarkers", side = ConfigSide.Shared)
+    @UnionConfig.Comment(comment = {"Whether death markers are visible on the atlas, minimap and exports."})
+    public boolean showDeathMarkers = true;
+
     @UnionConfig.Entry(group = "Gameplay", name = "deathMarkerLimit",
     		translatable = "text.autoconfig.antiqueatlas.option.deathMarkerLimit", side = ConfigSide.Shared)
     @UnionConfig.Comment(comment = {"How many latest death markers are kept per atlas. Older death markers are removed automatically."})
