@@ -75,17 +75,19 @@ public class TextureSet implements Comparable<TextureSet> {
      * Actually used when stitching along the diagonal.
      */
     public boolean shouldStitchTo(TextureSet toSet) {
-        return toSet == this || stitchesToNull && toSet == null || stitchTo.contains(toSet.name);
+        return toSet == this || stitchesToNull && toSet == null || toSet != null && stitchTo.contains(toSet.name);
     }
 
     public boolean shouldStitchToHorizontally(TextureSet toSet) {
         if (toSet == this || stitchesToNull && toSet == null) return true;
+        if (toSet == null) return false;
         if (anisotropicStitching) return stitchToHorizontal.contains(toSet.name);
         else return stitchTo.contains(toSet.name);
     }
 
     public boolean shouldStitchToVertically(TextureSet toSet) {
         if (toSet == this || stitchesToNull && toSet == null) return true;
+        if (toSet == null) return false;
         if (anisotropicStitching) return stitchToVertical.contains(toSet.name);
         else return stitchTo.contains(toSet.name);
     }

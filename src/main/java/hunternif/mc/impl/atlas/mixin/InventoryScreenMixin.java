@@ -35,7 +35,6 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
                 .build(builder -> new Button(builder) {
                     @Override
                     protected void renderWidget(net.minecraft.client.gui.GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
                         guiGraphics.renderItem(atlasIcon, getX() + 1, getY() + 1);
                     }
                 }));

@@ -44,6 +44,16 @@ public class AntiqueAtlasConfig implements ConfigObject {
     @UnionConfig.Comment(comment = {"If true, each player has a built-in atlas that can be opened without carrying an atlas item."})
     public boolean enablePlayerAtlas = false;
 
+    @UnionConfig.Entry(group = "Gameplay", name = "enableBiomeInspect",
+    		translatable = "text.autoconfig.antiqueatlas.option.enableBiomeInspect", side = ConfigSide.Shared)
+    @UnionConfig.Comment(comment = {"If true, holding right mouse button over the atlas map highlights the hovered biome tile and shows its name."})
+    public boolean enableBiomeInspect = true;
+
+    @UnionConfig.Entry(group = "Gameplay", name = "biomeInspectTexture",
+    		translatable = "text.autoconfig.antiqueatlas.option.biomeInspectTexture", side = ConfigSide.Shared)
+    @UnionConfig.Comment(comment = {"Texture set tile id used for biome inspect overlay. Example: antiqueatlas:test"})
+    public String biomeInspectTexture = "antiqueatlas:test";
+
     @UnionConfig.Entry(group = "Gameplay", name = "minimap", 
     		translatable = "text.autoconfig.antiqueatlas.option.minimap", side = ConfigSide.Shared)
     @UnionConfig.Comment(comment = {"Show a minimap if held in the mainhand"})

@@ -10,7 +10,9 @@ import hunternif.mc.impl.atlas.client.gui.core.GuiStates.IState;
 import hunternif.mc.impl.atlas.client.gui.core.GuiStates.SimpleState;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import hunternif.mc.impl.atlas.client.texture.TileTexture;
+import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.core.WorldData;
+import hunternif.mc.impl.atlas.core.scaning.TileHeightType;
 import hunternif.mc.impl.atlas.event.MarkerClickedCallback;
 import hunternif.mc.impl.atlas.event.MarkerHoveredCallback;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
@@ -27,17 +29,24 @@ import org.lwjgl.opengl.GL11;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.Set;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -46,6 +55,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
 
 public class GuiAtlas extends GuiComponent {
     public static final int WIDTH = 310;
@@ -69,7 +79,6 @@ public class GuiAtlas extends GuiComponent {
      * visually, but will instead span greater area.
      */
     private static final double MIN_SCALE_THRESHOLD = 0.5;
-
     private final long[] renderTimes = new long[30];
 
     private int renderTimesIndex = 0;
@@ -298,8 +307,23 @@ public class GuiAtlas extends GuiComponent {
     private final int zoomLevelOne = 8;
     private int zoomLevel = zoomLevelOne;
     private final String[] zoomNames = new String[]{"256", "128", "64", "32", "16", "8", "4", "2", "1", "1/2", "1/4", "1/8", "1/16", "1/32", "1/64", "1/128", "1/256"};
+    private BiomeSelectionTarget selectedBiomeTarget;
+    private BiomeSelection selectedBiomeSelection;
 
     private Thread exportThread;
+
+    private record BiomeInspectInfo(int anchorChunkX, int anchorChunkZ, int chunkX, int chunkZ, int step,
+                                    ResourceLocation biomeId, Component label) {
+    }
+
+    private record BiomeSelectionTarget(int anchorChunkX, int anchorChunkZ, ResourceLocation biomeId, Component label) {
+    }
+
+    private record BiomeSelection(int step, Rect scope, Set<Long> cells) {
+        private boolean contains(int chunkX, int chunkZ) {
+            return cells.contains(pack(chunkX, chunkZ));
+        }
+    }
 
     @SuppressWarnings("rawtypes")
     public GuiAtlas() {
@@ -464,6 +488,8 @@ public class GuiAtlas extends GuiComponent {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
 
         this.player = Minecraft.getInstance().player;
+        this.selectedBiomeTarget = null;
+        this.selectedBiomeSelection = null;
         updateAtlasData();
         if (biomeData != null && !followPlayer && AntiqueAtlas.CONFIG.doSaveBrowsingPos) {
             loadSavedBrowsingPosition();
@@ -539,6 +565,26 @@ public class GuiAtlas extends GuiComponent {
             return true;
         }
 
+        boolean isMouseOverMap = isMouseOverMap(mouseX, mouseY);
+
+        if (mouseState == 1 && state.is(NORMAL) && AntiqueAtlas.CONFIG.enableBiomeInspect && isMouseOverMap) {
+            BiomeInspectInfo info = getBiomeInspectInfo();
+            if (info == null) {
+                return true;
+            }
+
+            refreshBiomeSelection();
+            if (selectedBiomeSelection != null
+                    && selectedBiomeSelection.contains(info.chunkX(), info.chunkZ())) {
+                selectedBiomeTarget = null;
+                selectedBiomeSelection = null;
+            } else {
+                selectedBiomeTarget = new BiomeSelectionTarget(info.anchorChunkX(), info.anchorChunkZ(), info.biomeId(), info.label());
+                refreshBiomeSelection();
+            }
+            return true;
+        }
+
         // close atlas with right-click
         if (mouseState == 1 && state.is(NORMAL)) {
             onClose();
@@ -546,10 +592,6 @@ public class GuiAtlas extends GuiComponent {
         }
 
         // If clicked on the map, start dragging
-        int mapX = (width - MAP_WIDTH) / 2;
-        int mapY = (height - MAP_HEIGHT) / 2;
-        boolean isMouseOverMap = mouseX >= mapX && mouseX <= mapX + MAP_WIDTH &&
-                mouseY >= mapY && mouseY <= mapY + MAP_HEIGHT;
         if (!state.is(NORMAL) && !state.is(HIDING_MARKERS)) {
             int atlasID = getAtlasID();
 
@@ -800,6 +842,7 @@ public class GuiAtlas extends GuiComponent {
             biomeData = null;
             globalMarkersData = null;
             localMarkersData = null;
+            selectedBiomeSelection = null;
             return;
         }
 
@@ -816,6 +859,8 @@ public class GuiAtlas extends GuiComponent {
         } else {
             localMarkersData = null;
         }
+
+        refreshBiomeSelection();
     }
 
     /**
@@ -897,6 +942,7 @@ public class GuiAtlas extends GuiComponent {
         scaleClipIndex = Mth.log2((int) (mapScale * 8192)) + 1 - 13;
         zoomLevel = -scaleClipIndex + zoomLevelOne;
         scaleAlpha = 255;
+        refreshBiomeSelection();
 
         if (followPlayer && (addOffsetX != 0 || addOffsetY != 0)) {
             followPlayer = false;
@@ -992,6 +1038,10 @@ public class GuiAtlas extends GuiComponent {
         renderMarkers(matrices, markersStartX, markersStartZ, markersEndX, markersEndZ, globalMarkersData);
         renderMarkers(matrices, markersStartX, markersStartZ, markersEndX, markersEndZ, localMarkersData);
 
+        if (state.is(NORMAL) && AntiqueAtlas.CONFIG.enableBiomeInspect && selectedBiomeSelection != null) {
+            renderBiomeInspect(matrices);
+        }
+
         RenderSystem.disableScissor();
 
         Textures.BOOK_FRAME_NARROW.draw(matrices, getGuiX(), getGuiY());
@@ -1047,6 +1097,203 @@ public class GuiAtlas extends GuiComponent {
             renderBackground(matrices);
             progressBar.draw(matrices, (width - 100) / 2, height / 2 - 34);
         }
+    }
+
+    private void renderBiomeInspect(GuiGraphics matrices) {
+        if (selectedBiomeSelection == null) {
+            return;
+        }
+
+        TileRenderIterator tiles = new TileRenderIterator(new SelectedBiomeStorage(selectedBiomeSelection));
+        tiles.setScope(selectedBiomeSelection.scope());
+        tiles.setStep(selectedBiomeSelection.step());
+
+        matrices.pose().pushPose();
+        matrices.pose().translate(
+                worldXToScreenX(selectedBiomeSelection.scope().minX * 16),
+                worldZToScreenY(selectedBiomeSelection.scope().minY * 16),
+                0
+        );
+
+        RenderSystem.setShaderColor(1, 1, 1, 0.65f);
+        for (SubTileQuartet subtiles : tiles) {
+            for (SubTile subtile : subtiles) {
+                if (subtile == null || subtile.tile == null) continue;
+                ITexture texture = TileTextureMap.instance().getTexture(subtile);
+                if (texture instanceof TileTexture tileTexture) {
+                    tileTexture.bind();
+                    tileTexture.drawSubTile(matrices, subtile, tileHalfSize);
+                }
+            }
+        }
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        matrices.pose().popPose();
+
+        if (selectedBiomeTarget != null && isMouseOverMap(getMouseX(), getMouseY())) {
+            drawTooltip(Collections.singletonList(selectedBiomeTarget.label()), font);
+        }
+    }
+
+    private BiomeInspectInfo getBiomeInspectInfo() {
+        if (!hasAccessibleAtlas() || biomeData == null || player == null || !isMouseOverMap(getMouseX(), getMouseY())) {
+            return null;
+        }
+
+        int x = screenXToWorldX((int) getMouseX());
+        int z = screenYToWorldZ((int) getMouseY());
+        ChunkPos hovered = new ChunkPos(new BlockPos(x, 0, z));
+        int alignedChunkX = Math.floorDiv(hovered.x, tile2ChunkScale) * tile2ChunkScale;
+        int alignedChunkZ = Math.floorDiv(hovered.z, tile2ChunkScale) * tile2ChunkScale;
+        ResourceLocation tile = getDisplayedTile(alignedChunkX, alignedChunkZ);
+        if (tile == null) {
+            return null;
+        }
+
+        Registry<Biome> biomeRegistry = player.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.BIOME);
+        ResourceLocation biomeId = resolveBiomeTileId(tile, biomeRegistry);
+        if (biomeId == null) {
+            return null;
+        }
+
+        Component label = getBiomeInspectLabel(biomeId);
+        return new BiomeInspectInfo(hovered.x, hovered.z, alignedChunkX, alignedChunkZ, tile2ChunkScale, biomeId, label);
+    }
+
+    private void refreshBiomeSelection() {
+        if (selectedBiomeTarget == null || biomeData == null || player == null || !hasAccessibleAtlas()) {
+            selectedBiomeSelection = null;
+            return;
+        }
+
+        selectedBiomeSelection = createBiomeSelection(selectedBiomeTarget);
+    }
+
+    private BiomeSelection createBiomeSelection(BiomeSelectionTarget target) {
+        Registry<Biome> biomeRegistry = player.getCommandSenderWorld().registryAccess().registryOrThrow(Registries.BIOME);
+        ITileStorage storage = AntiqueAtlas.lodTileAggregationService.createStorage(
+                biomeData,
+                new Rect(biomeData.getScope()),
+                tile2ChunkScale,
+                player.getCommandSenderWorld().dimension().location()
+        );
+        Rect storageScope = storage.getScope();
+        int alignedChunkX = Math.floorDiv(target.anchorChunkX(), tile2ChunkScale) * tile2ChunkScale;
+        int alignedChunkZ = Math.floorDiv(target.anchorChunkZ(), tile2ChunkScale) * tile2ChunkScale;
+        ResourceLocation anchorBiomeId = resolveBiomeTileId(storage.getTile(alignedChunkX, alignedChunkZ), biomeRegistry);
+        if (!target.biomeId().equals(anchorBiomeId)) {
+            return null;
+        }
+
+        Set<Long> selectedCells = new HashSet<>();
+        Set<Long> visited = new HashSet<>();
+        Deque<Long> queue = new ArrayDeque<>();
+        Rect bounds = new Rect(alignedChunkX, alignedChunkZ, alignedChunkX, alignedChunkZ);
+        queue.add(pack(alignedChunkX, alignedChunkZ));
+
+        while (!queue.isEmpty()) {
+            long packed = queue.removeFirst();
+            if (!visited.add(packed)) {
+                continue;
+            }
+
+            int chunkX = unpackX(packed);
+            int chunkZ = unpackZ(packed);
+            if (!isInScope(storageScope, chunkX, chunkZ)) {
+                continue;
+            }
+
+            ResourceLocation biomeId = resolveBiomeTileId(storage.getTile(chunkX, chunkZ), biomeRegistry);
+            if (!target.biomeId().equals(biomeId)) {
+                continue;
+            }
+
+            selectedCells.add(packed);
+            bounds.extendTo(chunkX, chunkZ);
+
+            queue.add(pack(chunkX + tile2ChunkScale, chunkZ));
+            queue.add(pack(chunkX - tile2ChunkScale, chunkZ));
+            queue.add(pack(chunkX, chunkZ + tile2ChunkScale));
+            queue.add(pack(chunkX, chunkZ - tile2ChunkScale));
+        }
+
+        if (selectedCells.isEmpty()) {
+            return null;
+        }
+
+        return new BiomeSelection(tile2ChunkScale, bounds, selectedCells);
+    }
+
+    private ResourceLocation getDisplayedTile(int chunkX, int chunkZ) {
+        ITileStorage storage = AntiqueAtlas.lodTileAggregationService.createStorage(
+                biomeData,
+                new Rect(chunkX, chunkZ, chunkX, chunkZ),
+                tile2ChunkScale,
+                player.getCommandSenderWorld().dimension().location()
+        );
+        return storage.getTile(chunkX, chunkZ);
+    }
+
+    private Component getBiomeInspectLabel(ResourceLocation biomeId) {
+        String translationKey = Util.makeDescriptionId("biome", biomeId);
+        if (I18n.exists(translationKey)) {
+            return Component.translatable(translationKey);
+        }
+
+        return Component.literal(biomeId.toString());
+    }
+
+    private ResourceLocation resolveBiomeTileId(ResourceLocation tile, Registry<Biome> biomeRegistry) {
+        if (tile == null) {
+            return null;
+        }
+
+        if (biomeRegistry.containsKey(tile)) {
+            return tile;
+        }
+
+        String tilePath = tile.getPath();
+        for (TileHeightType type : TileHeightType.values()) {
+            String suffix = "_" + type.getName();
+            if (!tilePath.endsWith(suffix)) {
+                continue;
+            }
+
+            ResourceLocation baseTile = ResourceLocation.tryBuild(tile.getNamespace(),
+                    tilePath.substring(0, tilePath.length() - suffix.length()));
+            if (baseTile != null && biomeRegistry.containsKey(baseTile)) {
+                return baseTile;
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean isInScope(Rect scope, int chunkX, int chunkZ) {
+        return chunkX >= scope.minX && chunkX <= scope.maxX && chunkZ >= scope.minY && chunkZ <= scope.maxY;
+    }
+
+    private static long pack(int x, int y) {
+        return ((long) x << 32) ^ (y & 0xffffffffL);
+    }
+
+    private static int unpackX(long packed) {
+        return (int) (packed >> 32);
+    }
+
+    private static int unpackZ(long packed) {
+        return (int) packed;
+    }
+
+    private static ResourceLocation getBiomeInspectOverlayTile() {
+        ResourceLocation configured = ResourceLocation.tryParse(AntiqueAtlas.CONFIG.biomeInspectTexture);
+        return configured != null ? configured : AntiqueAtlas.id("test");
+    }
+
+    private boolean isMouseOverMap(double mouseX, double mouseY) {
+        int mapX = (width - MAP_WIDTH) / 2;
+        int mapY = (height - MAP_HEIGHT) / 2;
+        return mouseX >= mapX && mouseX <= mapX + MAP_WIDTH &&
+                mouseY >= mapY && mouseY <= mapY + MAP_HEIGHT;
     }
 
     private void renderPlayer(GuiGraphics matrices, double iconScale) {
@@ -1270,5 +1517,38 @@ public class GuiAtlas extends GuiComponent {
 
     private OptionalInt resolveAtlasID() {
         return AtlasIdentityService.resolveAtlasId(player, stack);
+    }
+
+    private static final class SelectedBiomeStorage implements ITileStorage {
+        private final BiomeSelection selection;
+
+        private SelectedBiomeStorage(BiomeSelection selection) {
+            this.selection = selection;
+        }
+
+        @Override
+        public void setTile(int x, int y, ResourceLocation tile) {
+            throw new UnsupportedOperationException("Biome inspect overlay is read-only");
+        }
+
+        @Override
+        public ResourceLocation removeTile(int x, int y) {
+            throw new UnsupportedOperationException("Biome inspect overlay is read-only");
+        }
+
+        @Override
+        public ResourceLocation getTile(int x, int y) {
+            return selection.contains(x, y) ? getBiomeInspectOverlayTile() : null;
+        }
+
+        @Override
+        public boolean hasTileAt(int x, int y) {
+            return selection.contains(x, y);
+        }
+
+        @Override
+        public Rect getScope() {
+            return selection.scope();
+        }
     }
 }

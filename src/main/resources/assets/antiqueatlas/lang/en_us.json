@@ -53,6 +53,8 @@
   "text.autoconfig.antiqueatlas.option.itemNeeded": "Atlas required for usage",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Enable atlas item",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Enable built-in player atlas",
+  "text.autoconfig.antiqueatlas.option.enableBiomeInspect": "Enable biome inspect",
+  "text.autoconfig.antiqueatlas.option.biomeInspectTexture": "Biome inspect overlay tile",
 
   "text.autoconfig.antiqueatlas.option.doScaleMarkers": "Scale markers",
   "text.autoconfig.antiqueatlas.option.defaultScale": "Default zoom level",
