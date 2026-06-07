@@ -25,6 +25,8 @@ public class AtlasScanService {
             data.syncToPlayer(atlasId, player);
         }
 
+        // Keep death-marker state consistent before marker sync or config-driven refreshes.
+        AntiqueAtlas.deathMarkerService.trimExcessDeathMarkers(player.level(), atlasId);
         MarkersData markers = AntiqueAtlas.markersData.getMarkersData(atlasId, player.level());
         if (!markers.isSyncedOnPlayer(player) && !markers.isEmpty()) {
             markers.syncToPlayer(atlasId, player);
@@ -48,6 +50,7 @@ public class AtlasScanService {
         }
 
         for (AtlasReference atlas : activeAtlasResolver.getActiveAtlases(player)) {
+            AntiqueAtlas.deathMarkerService.trimExcessDeathMarkers(player.level(), atlas.atlasId());
             Collection<TileInfo> newTiles = updateAtlasAroundPlayer(player, atlas.atlasId());
             if (!newTiles.isEmpty()) {
                 new DimensionUpdateS2CPacket(atlas.atlasId(), player.level().dimension(), newTiles)

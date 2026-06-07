@@ -108,7 +108,8 @@ public final class AtlasIdentityService {
                     applyAtlasNameToStack(stack, storedName.get());
                 }
             } else {
-                setAtlasName(world, atlasId, stackName);
+                stack.resetHoverName();
+                clearSyncedName(stack);
             }
             return;
         }
@@ -132,6 +133,21 @@ public final class AtlasIdentityService {
             applyAtlasNameToStack(stack, storedName.get());
         } else {
             clearSyncedName(stack);
+        }
+    }
+
+    public static void copyAtlasNameState(ItemStack source, ItemStack target) {
+        if (source.hasCustomHoverName()) {
+            target.setHoverName(source.getHoverName());
+        } else {
+            target.resetHoverName();
+        }
+
+        String syncedName = getSyncedName(source);
+        if (syncedName != null) {
+            setSyncedName(target, syncedName);
+        } else {
+            clearSyncedName(target);
         }
     }
 

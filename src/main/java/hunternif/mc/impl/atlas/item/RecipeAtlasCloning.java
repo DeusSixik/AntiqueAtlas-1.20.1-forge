@@ -1,6 +1,7 @@
 package hunternif.mc.impl.atlas.item;
 
 import hunternif.mc.impl.atlas.AntiqueAtlas;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -74,10 +75,7 @@ public class RecipeAtlasCloning extends CustomRecipe {
         if (!filledAtlas.isEmpty() && i >= 1) {
             ItemStack newAtlas = new ItemStack(AntiqueAtlasItems.Items.ATLAS, i + 1);
             AntiqueAtlasItems.Components.ATLAS_ID_DATA.setData(newAtlas, AntiqueAtlasItems.Components.ATLAS_ID_DATA.getData(filledAtlas));
-
-            if (filledAtlas.hasCustomHoverName()) {
-                newAtlas.setHoverName(filledAtlas.getHoverName());
-            }
+            AtlasIdentityService.copyAtlasNameState(filledAtlas, newAtlas);
 
             return newAtlas;
         } else {

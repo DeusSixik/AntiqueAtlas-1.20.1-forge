@@ -85,21 +85,24 @@ public class AtlasDirectoryData extends SavedData {
         return Optional.ofNullable(atlasNames.get(atlasId));
     }
 
-    public void setAtlasName(int atlasId, String name) {
+    public boolean setAtlasName(int atlasId, String name) {
         String normalizedName = normalizeAtlasName(name);
         String previousName = atlasNames.get(atlasId);
         if (normalizedName == null) {
             if (previousName != null) {
                 atlasNames.remove(atlasId);
                 setDirty();
+                return true;
             }
-            return;
+            return false;
         }
 
         if (!normalizedName.equals(previousName)) {
             atlasNames.put(atlasId, normalizedName);
             setDirty();
+            return true;
         }
+        return false;
     }
 
     @Override
