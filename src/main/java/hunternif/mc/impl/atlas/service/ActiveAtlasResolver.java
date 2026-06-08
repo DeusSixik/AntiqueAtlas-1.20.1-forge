@@ -1,15 +1,15 @@
 package hunternif.mc.impl.atlas.service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.identity.AtlasReference;
 import hunternif.mc.impl.atlas.item.AtlasItem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ActiveAtlasResolver {
     public List<AtlasReference> getActiveAtlases(Player player) {

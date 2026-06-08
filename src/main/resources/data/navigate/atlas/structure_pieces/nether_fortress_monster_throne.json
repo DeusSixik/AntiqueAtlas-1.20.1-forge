@@ -1,0 +1,7 @@
+{
+    "priority":  40,
+    "piece_type":  "minecraft:nemt",
+    "setter":  "always",
+    "version":  1,
+    "tile":  "navigate:nether_throne"
+}

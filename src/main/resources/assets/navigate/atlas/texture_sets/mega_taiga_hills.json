@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:mega_taiga_hills": 2,
+      "navigate:mega_taiga_hills2": 1
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:fence": 1
+    },
+    "stitch": {
+      "navigate:house": "both"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:hills": 5,
+      "navigate:sand": 2,
+      "navigate:sand2": 2,
+      "navigate:sand3": 2,
+      "navigate:sand_bushes": 2,
+      "navigate:cacti": 1
+    },
+    "stitch": {
+      "navigate:mesa": "both",
+      "navigate:bryce": "both"
+    }
+  }
+}

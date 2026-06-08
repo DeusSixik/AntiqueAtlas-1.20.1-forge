@@ -1,0 +1,7 @@
+{
+    "priority":  70,
+    "piece_type":  "minecraft:nesc",
+    "setter":  "always",
+    "version":  1,
+    "tile":  "navigate:nether_wall"
+}

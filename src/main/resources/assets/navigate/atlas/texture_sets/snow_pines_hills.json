@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:snow_pines_hills": 1,
+      "navigate:snow_pines_hills2": 1,
+      "navigate:snow_pines_hills3": 1
+    },
+    "stitch": {
+      "navigate:snow": "both",
+      "navigate:snow_hills": "both",
+      "navigate:ice_spikes": "both",
+      "navigate:snow_pines_hills": "both"
+    }
+  }
+}

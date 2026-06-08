@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:forest": 1,
+      "navigate:forest2": 1,
+      "navigate:forest3": 1
+    }
+  }
+}

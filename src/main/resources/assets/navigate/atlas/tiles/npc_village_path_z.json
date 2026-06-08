@@ -1,0 +1,9 @@
+{
+	"version": 1,
+	"texture_set": "navigate:village_path_z",
+	"lod": {
+		"group": "navigate:village",
+		"priority": 0,
+		"min_count": 2
+	}
+}

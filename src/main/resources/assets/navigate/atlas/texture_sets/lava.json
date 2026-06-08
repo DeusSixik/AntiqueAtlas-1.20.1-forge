@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:lava": 1,
+      "navigate:lava2": 1
+    },
+    "stitch": {
+      "navigate:lava_shore": "both",
+      "navigate:nether_bridge": "both",
+      "navigate:nether_bridge_gate": "both",
+      "navigate:nether_tower": "both",
+      "navigate:nether_throne": "both",
+      "navigate:nether_wall": "both",
+      "navigate:nether_hall": "both",
+      "navigate:nether_fort_stairs": "both",
+      "navigate:nether_bridge_x": "both",
+      "navigate:nether_bridge_end_x": "both",
+      "navigate:nether_bridge_z": "both",
+      "navigate:nether_bridge_end_z": "both"
+    }
+  }
+}

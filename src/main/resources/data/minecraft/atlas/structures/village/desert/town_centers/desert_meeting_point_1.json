@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "tile": "antiqueatlas:npc_village_well",
+  "tile": "navigate:npc_village_well",
   "priority": 70
 }

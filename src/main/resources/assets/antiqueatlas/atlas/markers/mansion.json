@@ -1,8 +1,0 @@
-{
-	"version": 1,
-	"textures": [
-		"antiqueatlas:textures/gui/markers/woodland_mansion.png"
-	],
-	"title_key": "gui.antiqueatlas.marker.mansion",
-	"default_label_key": "gui.antiqueatlas.marker.mansion"
-}

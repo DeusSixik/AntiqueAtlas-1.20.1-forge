@@ -1,8 +1,0 @@
-{
-	"version": 1,
-	"texture_set": "antiqueatlas:house_small",
-	"lod": {
-		"group": "antiqueatlas:village",
-		"priority": 55
-	}
-}

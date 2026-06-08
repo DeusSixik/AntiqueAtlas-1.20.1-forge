@@ -1,19 +1,10 @@
 package hunternif.mc.impl.atlas.marker;
 
-import hunternif.mc.impl.atlas.AntiqueAtlas;
+import com.stereowalker.unionlib.util.VersionHelper;
 import hunternif.mc.api.MarkerAPI;
+import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.util.Log;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.stereowalker.unionlib.util.VersionHelper;
-
-import net.minecraft.core.HolderLookup.Provider;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,6 +16,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Contains markers, mapped to dimensions, and then to their chunk coordinates.

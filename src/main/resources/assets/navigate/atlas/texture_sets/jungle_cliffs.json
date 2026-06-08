@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:jungle_cliffs": 1,
+      "navigate:jungle_cliffs2": 1,
+      "navigate:bushes_cliffs": 1
+    }
+  }
+}

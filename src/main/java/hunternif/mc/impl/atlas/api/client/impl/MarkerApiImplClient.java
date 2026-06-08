@@ -1,10 +1,10 @@
 package hunternif.mc.impl.atlas.api.client.impl;
 
-import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.api.MarkerAPI;
+import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.marker.Marker;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.PutMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
+import hunternif.mc.impl.atlas.network.packet.c2s.play.PutMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.UpdateMarkerC2SPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

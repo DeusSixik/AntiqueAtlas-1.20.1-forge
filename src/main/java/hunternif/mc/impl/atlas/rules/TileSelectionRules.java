@@ -1,13 +1,9 @@
 package hunternif.mc.impl.atlas.rules;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TileSelectionRules {
     private static final int LEGACY_STRUCTURE_PRIORITY_BASE = 1000;
@@ -59,6 +55,44 @@ public class TileSelectionRules {
         return bestPriority;
     }
 
+    public synchronized ResourceLocation resolveOutputTile(TileSelectionSource source,
+                                                           ResourceLocation tileId,
+                                                           ResourceLocation dimensionId,
+                                                           long worldSeed,
+                                                           int chunkX,
+                                                           int chunkZ) {
+        if (tileId == null) {
+            return null;
+        }
+
+        TileSelectionRule bestRule = null;
+        for (TileSelectionRule rule : rules) {
+            if (!rule.hasOutputTiles() || !rule.matches(source, tileId, dimensionId)) {
+                continue;
+            }
+            if (bestRule == null || rule.priority() > bestRule.priority()) {
+                bestRule = rule;
+            }
+        }
+
+        if (bestRule == null) {
+            return tileId;
+        }
+
+        List<ResourceLocation> outputs = bestRule.outputTiles();
+        if (outputs.size() == 1) {
+            return outputs.get(0);
+        }
+
+        long hash = worldSeed;
+        hash = hash * 31L + source.ordinal();
+        hash = hash * 31L + chunkX;
+        hash = hash * 31L + chunkZ;
+        hash = hash * 31L + tileId.hashCode();
+        int index = Math.floorMod((int) (hash ^ (hash >>> 32)), outputs.size());
+        return outputs.get(index);
+    }
+
     public synchronized int getExplicitPriority(TileSelectionSource source, ResourceLocation tileId, ResourceLocation dimensionId) {
         if (tileId == null) {
             return Integer.MIN_VALUE;
@@ -103,5 +137,17 @@ public class TileSelectionRules {
 
     public synchronized Map<ResourceLocation, Integer> getTilePrioritiesView() {
         return Collections.unmodifiableMap(new HashMap<>(tilePriorities));
+    }
+
+    public synchronized ResourceLocation resolveBaseBiomeTile(ResourceLocation tileId) {
+        if (tileId == null) {
+            return null;
+        }
+        for (TileSelectionRule rule : rules) {
+            if (rule.source() == TileSelectionSource.BIOME && rule.outputTiles().contains(tileId) && rule.tileId() != null) {
+                return rule.tileId();
+            }
+        }
+        return tileId;
     }
 }

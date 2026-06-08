@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:savanna_cliffs": 1,
+      "navigate:savanna_cliffs2": 1,
+      "navigate:savanna_cliffs3": 1,
+      "navigate:cliffs": 1
+    }
+  }
+}

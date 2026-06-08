@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:swamp_hills": 1,
+      "navigate:swamp_hills2": 1,
+      "navigate:swamp_hills3": 1,
+      "navigate:swamp_hills4": 1,
+      "navigate:swamp_hills5": 1
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:plateau_grass": 2,
+      "navigate:plateau_grass2": 2,
+      "navigate:plateau_grass3": 2,
+      "navigate:plateau_savanna": 1,
+      "navigate:plateau_savanna2": 1,
+      "navigate:plateau_savanna3": 1
+    },
+    "stitch":{
+      "navigate:plateau_mesa": "both",
+      "navigate:plateau_mesa_trees": "both",
+      "navigate:plateau_savanna_m": "both"
+    }
+  }
+}

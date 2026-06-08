@@ -1,10 +1,8 @@
 package hunternif.mc.impl.atlas.network.packet.c2s.play;
 
 import com.stereowalker.unionlib.network.protocol.game.ServerboundUnionPacket;
-
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

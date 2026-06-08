@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:water": 1,
+      "navigate:water2": 1
+    },
+    "stitch": {
+      "navigate:shore": "both",
+      "navigate:rock_shore": "both",
+      "navigate:swamp": "both",
+      "navigate:swamp_water": "both"
+    }
+  }
+}

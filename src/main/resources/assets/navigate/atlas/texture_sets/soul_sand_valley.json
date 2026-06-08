@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:sand": 1,
+      "navigate:sand2": 1,
+      "navigate:sand_bushes": 1
+    }
+  }
+}

@@ -1,28 +1,24 @@
 package hunternif.mc.impl.atlas.rules;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-
-import com.google.gson.JsonElement;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stereowalker.unionlib.resource.ReloadListener;
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.resource.ResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class TileSelectionConfig implements ResourceReloadListener<TileSelectionRules>, ReloadListener {
     public static final ResourceLocation ID = AntiqueAtlas.id("tile_selection");
@@ -101,7 +97,42 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
             throw new IllegalArgumentException("Invalid tile id: " + tile);
         }
 
-        return new TileSelectionRule(source, priority, tileId, tilePrefix, readDimensions(object));
+        return new TileSelectionRule(source, priority, tileId, tilePrefix, readDimensions(object), readOutputTiles(object));
+    }
+
+    private List<ResourceLocation> readOutputTiles(JsonObject object) {
+        List<ResourceLocation> outputTiles = new ArrayList<>();
+        readTileArray(object, "tiles", outputTiles);
+        readTileArray(object, "output_tiles", outputTiles);
+        readTileArray(object, "result_tiles", outputTiles);
+        readSingleTile(object, "output_tile", outputTiles);
+        readSingleTile(object, "result_tile", outputTiles);
+        return outputTiles;
+    }
+
+    private void readTileArray(JsonObject object, String key, List<ResourceLocation> outputTiles) {
+        JsonArray array = object.getAsJsonArray(key);
+        if (array == null) {
+            return;
+        }
+        for (JsonElement element : array) {
+            ResourceLocation tileId = ResourceLocation.tryParse(element.getAsString());
+            if (tileId == null) {
+                throw new IllegalArgumentException("Invalid output tile id: " + element.getAsString());
+            }
+            outputTiles.add(tileId);
+        }
+    }
+
+    private void readSingleTile(JsonObject object, String key, List<ResourceLocation> outputTiles) {
+        if (!object.has(key)) {
+            return;
+        }
+        ResourceLocation tileId = ResourceLocation.tryParse(object.getAsJsonPrimitive(key).getAsString());
+        if (tileId == null) {
+            throw new IllegalArgumentException("Invalid output tile id: " + object.getAsJsonPrimitive(key).getAsString());
+        }
+        outputTiles.add(tileId);
     }
 
     private Set<ResourceLocation> readDimensions(JsonObject object) {
@@ -175,7 +206,7 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
         }
 
         for (Entry<String, JsonElement> entry : prefixPriorities.entrySet()) {
-            rules.addRule(new TileSelectionRule(TileSelectionSource.GLOBAL, entry.getValue().getAsInt(), null, entry.getKey(), Collections.emptySet()));
+            rules.addRule(new TileSelectionRule(TileSelectionSource.GLOBAL, entry.getValue().getAsInt(), null, entry.getKey(), Collections.emptySet(), Collections.emptyList()));
         }
     }
 

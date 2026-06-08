@@ -1,14 +1,13 @@
 package hunternif.mc.impl.atlas.core;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import hunternif.mc.impl.atlas.item.AtlasItem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides access to {@link AtlasData}. Maintains a cache on the client side,

@@ -1,7 +1,5 @@
 package hunternif.mc.impl.atlas.client.gui.core;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.GuiGraphics;
 
 public class GuiHScrollbar extends AGuiScrollbar {

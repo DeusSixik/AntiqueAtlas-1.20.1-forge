@@ -3,10 +3,9 @@ package hunternif.mc.impl.atlas;
 import com.stereowalker.unionlib.config.ConfigObject;
 import com.stereowalker.unionlib.config.ConfigSide;
 import com.stereowalker.unionlib.config.UnionConfig;
-
 import hunternif.mc.impl.atlas.client.gui.GuiAtlas;
 
-@UnionConfig(name = "antiqueatlas", autoReload = true)
+@UnionConfig(name = "navigate", autoReload = true)
 public class AntiqueAtlasConfig implements ConfigObject {
     //============ Gameplay settings ==============
     @UnionConfig.Entry(group = "Gameplay", name = "doSaveBrowsingPos", 
@@ -46,8 +45,8 @@ public class AntiqueAtlasConfig implements ConfigObject {
 
     @UnionConfig.Entry(group = "Gameplay", name = "biomeInspectTexture",
     		translatable = "text.autoconfig.antiqueatlas.option.biomeInspectTexture", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Texture set tile id used for biome inspect overlay. Example: antiqueatlas:test"})
-    public String biomeInspectTexture = "antiqueatlas:test";
+    @UnionConfig.Comment(comment = {"Texture set tile id used for biome inspect overlay. Example: navigate:test"})
+    public String biomeInspectTexture = "navigate:test";
 
     //============ Interface settings =============
     @UnionConfig.Entry(group = "User Interface", name = "doScaleMarkers", 

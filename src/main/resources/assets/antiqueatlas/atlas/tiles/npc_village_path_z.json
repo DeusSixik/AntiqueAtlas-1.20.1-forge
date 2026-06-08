@@ -1,9 +1,0 @@
-{
-	"version": 1,
-	"texture_set": "antiqueatlas:village_path_z",
-	"lod": {
-		"group": "antiqueatlas:village",
-		"priority": 0,
-		"min_count": 2
-	}
-}

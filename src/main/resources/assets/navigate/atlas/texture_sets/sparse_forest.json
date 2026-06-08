@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:forest_sparse": 1,
+      "navigate:forest_sparse2": 1,
+      "navigate:forest_sparse3": 1,
+      "navigate:grass": 1,
+      "navigate:grass2": 1,
+      "navigate:grass3": 1,
+      "navigate:grass4": 1
+    }
+  }
+}

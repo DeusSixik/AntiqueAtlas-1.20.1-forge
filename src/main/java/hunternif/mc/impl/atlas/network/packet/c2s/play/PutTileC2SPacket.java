@@ -1,7 +1,6 @@
 package hunternif.mc.impl.atlas.network.packet.c2s.play;
 
 import com.stereowalker.unionlib.network.protocol.game.ServerboundUnionPacket;
-
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.util.Log;

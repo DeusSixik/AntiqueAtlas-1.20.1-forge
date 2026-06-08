@@ -1,7 +1,7 @@
 package hunternif.mc.impl.atlas.api.impl;
 
-import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.api.MarkerAPI;
+import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
@@ -9,14 +9,14 @@ import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.UpdateMarkerS2CPacket;
 import hunternif.mc.impl.atlas.util.Log;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Collections;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
 
 public class MarkerApiImpl implements MarkerAPI {
     /**

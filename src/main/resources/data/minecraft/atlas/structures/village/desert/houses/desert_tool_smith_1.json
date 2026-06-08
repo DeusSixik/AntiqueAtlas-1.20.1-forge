@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "tile": "antiqueatlas:npc_village_smithy",
+  "tile": "navigate:npc_village_smithy",
   "priority": 90
 }

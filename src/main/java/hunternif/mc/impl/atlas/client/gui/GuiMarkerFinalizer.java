@@ -1,11 +1,5 @@
 package hunternif.mc.impl.atlas.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.stereowalker.unionlib.client.gui.screens.controls.ModControlsScreen;
-import com.stereowalker.unionlib.util.ScreenHelper;
-
 import hunternif.mc.api.client.AtlasClientAPI;
 import hunternif.mc.impl.atlas.client.gui.core.GuiComponent;
 import hunternif.mc.impl.atlas.client.gui.core.GuiScrollingContainer;
@@ -22,6 +16,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This GUI is used select marker icon and enter a label.
@@ -88,7 +85,7 @@ public class GuiMarkerFinalizer extends GuiComponent {
     public void init() {
         super.init();
 
-        addRenderableWidget(btnDone = ScreenHelper.buttonBuilder(Component.translatable("gui.done"), (button) -> {
+        addRenderableWidget(btnDone = Button.builder(Component.translatable("gui.done"), (button) -> {
             Component markerLabel = resolveMarkerLabel();
             if (editingMarkerId != null) {
                 AtlasClientAPI.getMarkerAPI().updateMarker(world, atlasID, editingMarkerId, MarkerType.REGISTRY.getKey(selectedType), markerLabel);
@@ -104,7 +101,7 @@ public class GuiMarkerFinalizer extends GuiComponent {
                     1F, 1F);
             closeChild();
         }).bounds(this.width / 2 - BUTTON_WIDTH - BUTTON_SPACING / 2, this.height / 2 + 40, BUTTON_WIDTH, 20).build());
-        addRenderableWidget(btnCancel = ScreenHelper.buttonBuilder(Component.translatable("gui.cancel"), (button) -> {
+        addRenderableWidget(btnCancel = Button.builder(Component.translatable("gui.cancel"), (button) -> {
             closeChild();
         }).bounds(this.width / 2 + BUTTON_SPACING / 2, this.height / 2 + 40, BUTTON_WIDTH, 20).build());
         textField = new EditBox(Minecraft.getInstance().font, (this.width - 200) / 2, this.height / 2 - 81, 200, 20, Component.translatable("gui.antiqueatlas.marker.label"));

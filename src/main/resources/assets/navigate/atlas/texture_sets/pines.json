@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:pines": 1,
+      "navigate:pines2": 1,
+      "navigate:pines3": 1
+    }
+  }
+}

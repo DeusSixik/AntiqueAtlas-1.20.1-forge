@@ -1,8 +1,6 @@
 package hunternif.mc.impl.atlas.structure;
 
 import hunternif.mc.impl.atlas.core.TileIdMap;
-import java.util.Collection;
-import java.util.Collections;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -10,6 +8,9 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class Overworld {
 

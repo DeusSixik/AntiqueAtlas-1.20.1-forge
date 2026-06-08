@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:snow_pines": 1,
+      "navigate:snow_pines2": 1,
+      "navigate:snow_pines3": 1
+    }
+  }
+}

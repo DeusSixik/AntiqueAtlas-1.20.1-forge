@@ -2,15 +2,16 @@ package hunternif.mc.impl.atlas.structure;
 
 import hunternif.mc.impl.atlas.core.TileIdMap;
 import hunternif.mc.impl.atlas.util.MathUtil;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 public class NetherFortress {
 	public static Collection<ChunkPos> bridgeX(Level world, StructurePoolElement element, BoundingBox box, StructurePiece piece) {

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:dense_forest": 1,
+      "navigate:dense_forest2": 1
+    }
+  }
+}

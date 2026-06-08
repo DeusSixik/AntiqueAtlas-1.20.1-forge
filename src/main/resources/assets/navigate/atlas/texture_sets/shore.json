@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "data": {
+    "shore": {
+      "water": "navigate:water"
+    },
+    "textures": {
+      "navigate:shore": 1,
+      "navigate:shore2": 1,
+      "navigate:shore3": 1
+    }
+  }
+}

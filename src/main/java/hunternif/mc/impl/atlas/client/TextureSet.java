@@ -1,10 +1,12 @@
 package hunternif.mc.impl.atlas.client;
 
-import hunternif.mc.impl.atlas.ClientProxy;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import hunternif.mc.impl.atlas.util.Log;
 import net.minecraft.resources.ResourceLocation;
-import java.util.*;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TextureSet implements Comparable<TextureSet> {
     /**

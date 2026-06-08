@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"texture_set": "navigate:village_torch",
+	"lod": {
+		"group": "navigate:village",
+		"priority": 10
+	}
+}

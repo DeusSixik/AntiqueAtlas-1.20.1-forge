@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:hills": 3,
+      "navigate:hills_bushes": 1
+    }
+  }
+}

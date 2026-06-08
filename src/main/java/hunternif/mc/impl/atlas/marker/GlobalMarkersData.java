@@ -1,6 +1,5 @@
 package hunternif.mc.impl.atlas.marker;
 
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;

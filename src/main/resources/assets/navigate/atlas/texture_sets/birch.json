@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:birch": 1,
+      "navigate:birch2": 1
+    }
+  }
+}

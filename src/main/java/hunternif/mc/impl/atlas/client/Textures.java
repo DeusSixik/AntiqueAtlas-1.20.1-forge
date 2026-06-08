@@ -1,15 +1,14 @@
 package hunternif.mc.impl.atlas.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import hunternif.mc.impl.atlas.client.texture.IconTexture;
 import hunternif.mc.impl.atlas.client.texture.Texture;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Textures {
     public final static Map<ResourceLocation, ITexture> TILE_TEXTURES_MAP  = new HashMap<>();

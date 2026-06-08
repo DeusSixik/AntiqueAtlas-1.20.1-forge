@@ -1,8 +1,8 @@
 package hunternif.mc.impl.atlas.structure;
 
-import java.util.List;
-
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.List;
 
 public class StructurePieceTileXZ extends StructurePieceTile {
     private final List<ResourceLocation> tilesZ;

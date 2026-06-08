@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:jungle": 1,
+      "navigate:jungle2": 1
+    }
+  }
+}

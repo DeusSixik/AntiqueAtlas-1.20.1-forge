@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:end_island": 1,
+      "navigate:end_island2": 1
+    },
+    "stitch": {
+      "navigate:end_island_plants": "both"
+    }
+  }
+}

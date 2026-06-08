@@ -1,11 +1,12 @@
 package hunternif.mc.impl.atlas.client.gui.core;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A GuiComponent that can act like a button.

@@ -1,18 +1,7 @@
 package hunternif.mc.impl.atlas.structure;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.util.MathUtil;
@@ -30,6 +19,9 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StructureHandler {
     private static final HashMultimap<ResourceLocation, RegisteredTile> STRUCTURE_PIECE_TO_TILE_MAP = HashMultimap.create();
@@ -318,7 +310,7 @@ public class StructureHandler {
         return "\n{\n" +
                 "  \"version\": 1,\n" +
                 "  \"piece_type\": \"" + structurePieceId + "\",\n" +
-                "  \"tile\": \"antiqueatlas:replace_me\",\n" +
+                "  \"tile\": \"navigate:replace_me\",\n" +
                 "  \"priority\": 100,\n" +
                 "  \"setter\": \"always\"\n" +
                 "}";
@@ -327,7 +319,7 @@ public class StructureHandler {
     private static String buildJigsawTemplate(ResourceLocation templateId) {
         return "\n{\n" +
                 "  \"version\": 1,\n" +
-                "  \"tile\": \"antiqueatlas:replace_me\",\n" +
+                "  \"tile\": \"navigate:replace_me\",\n" +
                 "  \"priority\": 100\n" +
                 "}\n" +
                 "// path example: data/" + templateId.getNamespace() + "/atlas/structures/" + templateId.getPath() + ".json";

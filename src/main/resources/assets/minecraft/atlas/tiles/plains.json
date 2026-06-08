@@ -1,9 +1,9 @@
 {
 	"version": 2,
 	"texture_sets": {
-		"default": "antiqueatlas:plains",
-		"mid": "antiqueatlas:hills",
-		"high": "antiqueatlas:mountains_naked",
-		"peak": "antiqueatlas:mountains_naked"
+		"default": "navigate:plains",
+		"mid": "navigate:hills",
+		"high": "navigate:mountains_naked",
+		"peak": "navigate:mountains_naked"
 	}
 }

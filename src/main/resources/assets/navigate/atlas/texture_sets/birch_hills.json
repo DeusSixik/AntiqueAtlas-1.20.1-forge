@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:birch_hills": 1,
+      "navigate:birch_hills2": 1
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "shore": {
+      "water": "navigate:lava"
+    },
+    "textures": {
+      "navigate:lava_shore": 1,
+      "navigate:lava_shore2": 1
+    }
+  }
+}

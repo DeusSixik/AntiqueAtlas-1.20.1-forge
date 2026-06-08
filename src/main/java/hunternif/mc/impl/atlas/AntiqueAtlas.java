@@ -1,8 +1,5 @@
 package hunternif.mc.impl.atlas;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.stereowalker.unionlib.api.collectors.ConfigCollector;
 import com.stereowalker.unionlib.api.collectors.InsertCollector;
 import com.stereowalker.unionlib.api.collectors.PacketCollector;
@@ -14,7 +11,6 @@ import com.stereowalker.unionlib.mod.MinecraftMod;
 import com.stereowalker.unionlib.mod.PacketHolder;
 import com.stereowalker.unionlib.mod.ServerSegment;
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.impl.atlas.core.AtlasIdData;
 import hunternif.mc.impl.atlas.core.GlobalTileDataHandler;
 import hunternif.mc.impl.atlas.core.PlayerEventHandler;
@@ -23,54 +19,39 @@ import hunternif.mc.impl.atlas.core.scaning.TileDetectorBase;
 import hunternif.mc.impl.atlas.core.scaning.WorldScanner;
 import hunternif.mc.impl.atlas.identity.AtlasDirectoryData;
 import hunternif.mc.impl.atlas.item.AntiqueAtlasItems;
+import hunternif.mc.impl.atlas.lod.LodTileAggregationService;
 import hunternif.mc.impl.atlas.marker.GlobalMarkersDataHandler;
 import hunternif.mc.impl.atlas.marker.MarkersDataHandler;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.PutBrowsingPositionC2SPacket;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.PutMarkerC2SPacket;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.PutTileC2SPacket;
-import hunternif.mc.impl.atlas.network.packet.c2s.play.UpdateMarkerC2SPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteGlobalTileS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.DimensionUpdateS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.MapDataS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.PutGlobalTileS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.PutTileS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncAtlasNameS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncPlayerAtlasIdS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.TileGroupsS2CPacket;
-import hunternif.mc.impl.atlas.network.packet.s2c.play.UpdateMarkerS2CPacket;
-import hunternif.mc.impl.atlas.lod.LodTileAggregationService;
+import hunternif.mc.impl.atlas.network.packet.c2s.play.*;
+import hunternif.mc.impl.atlas.network.packet.s2c.play.*;
 import hunternif.mc.impl.atlas.rules.TileSelectionConfig;
 import hunternif.mc.impl.atlas.rules.TileSelectionRules;
 import hunternif.mc.impl.atlas.service.ActiveAtlasResolver;
 import hunternif.mc.impl.atlas.service.AtlasScanService;
 import hunternif.mc.impl.atlas.service.DeathMarkerService;
 import hunternif.mc.impl.atlas.structure.JigsawConfig;
-import hunternif.mc.impl.atlas.structure.NetherFortress;
-import hunternif.mc.impl.atlas.structure.Overworld;
-import hunternif.mc.impl.atlas.structure.StructurePieceConfig;
 import hunternif.mc.impl.atlas.structure.StructureHandler;
+import hunternif.mc.impl.atlas.structure.StructurePieceConfig;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(value = AntiqueAtlas.ID)
 public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 	public static AntiqueAtlas instance;
 	
     public AntiqueAtlas() {
-    	super("antiqueatlas", () -> new AntiqueAtlasClientSegment(), () -> new ServerSegment());
+    	super("navigate", () -> new AntiqueAtlasClientSegment(), () -> new ServerSegment());
     	instance = this;
 	}
 
-	public static final String ID = "antiqueatlas";
+	public static final String ID = "navigate";
     public static final String NAME = "Antique Atlas";
 
     public static Logger LOG = LogManager.getLogger(NAME);
@@ -144,8 +125,8 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
     		globalTileData.onPlayerLogin((ServerPlayer) player);
     		PlayerEventHandler.onPlayerLogin((ServerPlayer) player);
     	});
-    	collector.addInsert(Inserts.STRUCTURE_ADDED, StructureHandler::resolve);
-    	collector.addInsert(Inserts.STRUCTURE_PIECE_ADDED, StructureHandler::resolve);
+    	collector.addInsert(Inserts.STRUCTURE_ADDED, (com.stereowalker.unionlib.api.collectors.InsertCollector.StructureStartHandler) StructureHandler::resolve);
+    	collector.addInsert(Inserts.STRUCTURE_PIECE_ADDED, (com.stereowalker.unionlib.api.collectors.InsertCollector.StructurePieceHandler) StructureHandler::resolve);
     	
     	collector.addInsert(Inserts.LIVING_TICK, (living) -> {
     		if (living instanceof Player player) PlayerEventHandler.onPlayerTick(player);

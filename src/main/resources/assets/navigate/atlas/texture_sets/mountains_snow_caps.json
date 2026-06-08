@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:mountains": 2,
+      "navigate:snow_caps": 2,
+      "navigate:mountains5": 1
+    },
+    "stitch": {
+      "navigate:mountains": "both",
+      "navigate:mountains_naked": "both",
+      "navigate:mountains_all": "both"
+    }
+  }
+}

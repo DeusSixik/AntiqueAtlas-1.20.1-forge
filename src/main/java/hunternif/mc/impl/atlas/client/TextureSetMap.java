@@ -1,7 +1,9 @@
 package hunternif.mc.impl.atlas.client;
 
 import net.minecraft.resources.ResourceLocation;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Maps texture sets to their names.

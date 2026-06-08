@@ -1,12 +1,5 @@
 package hunternif.mc.impl.atlas.core.scaning;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.core.TileIdMap;
 import net.minecraft.core.BlockPos;
@@ -20,6 +13,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
+
+import java.util.*;
 
 /**
  * Detects the 256 vanilla biomes, water pools and lava pools.

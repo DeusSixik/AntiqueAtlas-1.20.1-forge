@@ -1,0 +1,17 @@
+{
+	"version": 1,
+	"textures": [
+		"navigate:textures/gui/markers/end_city.png",
+		"navigate:textures/gui/markers/end_city_mipped_32.png",
+		"navigate:textures/gui/markers/end_city_mipped_16.png"
+	],
+	"title": "End City",
+	"default_label": "End City",
+	"size": 3,
+	"clipMin": -1,
+	"alwaysShow": true,
+	"isTile": true,
+	"isTechnical": true,
+	"centerX": 0.5,
+	"centerY": 0.75
+}

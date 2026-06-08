@@ -1,0 +1,11 @@
+{
+	"version": 1,
+	"textures": [
+		"navigate:textures/gui/markers/end_city_far.png"
+	],
+	"title": "End City",
+	"default_label": "End City",
+	"size": 1,
+	"clipMin": -2,
+	"isTechnical": true
+}

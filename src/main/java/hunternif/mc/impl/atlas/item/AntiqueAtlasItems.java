@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.stereowalker.unionlib.core.registries.RegistryHolder;
 import com.stereowalker.unionlib.core.registries.RegistryObject;
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +39,7 @@ public class AntiqueAtlasItems {
 	public class Items {
 		@RegistryObject("empty_antique_atlas")
 		public static final Item EMPTY_ATLAS = new EmptyAtlasItem(new Item.Properties());
-		@RegistryObject("antique_atlas")
+		@RegistryObject("navigation")
 		public static final Item ATLAS = new AtlasItem(new Item.Properties().stacksTo(1));
 	}
 	

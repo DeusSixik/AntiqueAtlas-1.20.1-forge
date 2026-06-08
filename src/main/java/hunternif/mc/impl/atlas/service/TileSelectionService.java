@@ -1,15 +1,16 @@
 package hunternif.mc.impl.atlas.service;
 
-import java.util.function.Function;
-
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.core.scaning.ITileDetector;
 import hunternif.mc.impl.atlas.rules.TileSelectionRules;
 import hunternif.mc.impl.atlas.rules.TileSelectionSource;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
+
+import java.util.function.Function;
 
 public class TileSelectionService {
     private final Function<ResourceKey<Level>, ITileDetector> detectorResolver;
@@ -35,6 +36,14 @@ public class TileSelectionService {
 
         if (chunk != null) {
             ResourceLocation biomeTile = detectorResolver.apply(world.dimension()).getBiomeID(world, chunk);
+            biomeTile = rules.resolveOutputTile(
+                    TileSelectionSource.BIOME,
+                    biomeTile,
+                    dimensionId,
+                    world instanceof ServerLevel serverLevel ? serverLevel.getSeed() : 0L,
+                    chunkX,
+                    chunkZ
+            );
             int biomePriority = rules.getPriority(TileSelectionSource.BIOME, biomeTile, dimensionId);
             if (biomePriority > bestPriority) {
                 bestTile = biomeTile;

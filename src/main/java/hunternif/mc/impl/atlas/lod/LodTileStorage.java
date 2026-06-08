@@ -1,13 +1,13 @@
 package hunternif.mc.impl.atlas.lod;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import hunternif.mc.impl.atlas.client.TileTextureMap;
 import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.rules.TileSelectionRules;
 import hunternif.mc.impl.atlas.util.Rect;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LodTileStorage implements ITileStorage {
     private final ITileStorage source;

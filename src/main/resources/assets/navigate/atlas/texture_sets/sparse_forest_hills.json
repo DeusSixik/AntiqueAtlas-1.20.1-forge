@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:forest_sparse_hills": 1,
+      "navigate:forest_sparse_hills2": 1,
+      "navigate:forest_sparse_hills3": 1,
+      "navigate:hills": 2,
+      "navigate:hills_bushes": 1
+    }
+  }
+}

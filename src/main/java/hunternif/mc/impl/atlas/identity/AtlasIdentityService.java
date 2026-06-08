@@ -1,10 +1,5 @@
 package hunternif.mc.impl.atlas.identity;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.item.AtlasItem;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncAtlasNameS2CPacket;
@@ -15,6 +10,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 public final class AtlasIdentityService {
     private static final String TAG_SYNCED_NAME = "aaAtlasSyncedName";
@@ -159,7 +159,7 @@ public final class AtlasIdentityService {
     }
 
     public static Component getDefaultAtlasName(int atlasId) {
-        return Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
+        return Component.translatable("item.navigate.navigation", atlasId);
     }
 
     public static void syncAtlasNameFromStack(ItemStack stack, Level world) {

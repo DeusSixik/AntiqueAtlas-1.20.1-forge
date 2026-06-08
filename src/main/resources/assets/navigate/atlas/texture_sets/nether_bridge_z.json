@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:nether_bridge_z": 1
+    },
+    "stitch": {
+      "navigate:nether_bridge_gate": "vertical",
+      "navigate:nether_tower": "vertical",
+      "navigate:nether_hall": "vertical",
+      "navigate:nether_fort_stairs": "vertical",
+      "navigate:nether_throne": "vertical",
+      "navigate:nether_bridge": "vertical",
+      "navigate:nether_bridge_end_z": "vertical"
+    }
+  }
+}

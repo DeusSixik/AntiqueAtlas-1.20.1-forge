@@ -1,0 +1,7 @@
+{
+    "priority":  90,
+    "piece_type":  "minecraft:nebef",
+    "setter":  "bridge_end_x",
+    "version":  1,
+    "tile":  "navigate:nether_bridge_end_x"
+}

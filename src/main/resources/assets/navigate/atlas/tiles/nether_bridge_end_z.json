@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"texture_set": "navigate:nether_bridge_end_z",
+	"lod": {
+		"group": "navigate:nether_fortress",
+		"priority": 35
+	}
+}

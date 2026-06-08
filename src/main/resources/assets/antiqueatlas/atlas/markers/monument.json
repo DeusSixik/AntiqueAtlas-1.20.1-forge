@@ -1,8 +1,0 @@
-{
-	"version": 1,
-	"textures": [
-		"antiqueatlas:textures/gui/markers/ocean_monument.png"
-	],
-	"title_key": "gui.antiqueatlas.marker.monument",
-	"default_label_key": "gui.antiqueatlas.marker.monument"
-}

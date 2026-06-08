@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:plateau_trees": 1,
+      "navigate:plateau_mesa": 1,
+      "navigate:plateau_mesa2": 1
+    },
+    "stitch": {
+      "navigate:plateau_mesa_low": "both"
+    }
+  }
+}

@@ -1,7 +1,6 @@
 package hunternif.mc.impl.atlas.core.watcher;
 
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,7 @@ public class DeathWatcher {
     public static void onPlayerDeath(Player player) {
         if (AntiqueAtlas.CONFIG.autoDeathMarker && !player.level().isClientSide()) {
             for (int atlasID : AtlasAPI.getAccessibleAtlases(player)) {
-                AtlasAPI.getMarkerAPI().putMarker(player.getCommandSenderWorld(), true, atlasID, VersionHelper.toLoc("antiqueatlas:tomb"),
+                AtlasAPI.getMarkerAPI().putMarker(player.getCommandSenderWorld(), true, atlasID, VersionHelper.toLoc("navigate:tomb"),
                         Component.translatable("gui.antiqueatlas.marker.tomb", player.getName()),
                         (int) player.getX(), (int) player.getZ());
                 AntiqueAtlas.deathMarkerService.trimExcessDeathMarkers(player.level(), atlasID);

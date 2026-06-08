@@ -6,7 +6,6 @@ import com.stereowalker.unionlib.client.gui.screens.config.ConfigScreen;
 import com.stereowalker.unionlib.insert.ClientInserts;
 import com.stereowalker.unionlib.mod.ClientSegment;
 import com.stereowalker.unionlib.util.VersionHelper;
-
 import hunternif.mc.impl.atlas.client.KeyHandler;
 import hunternif.mc.impl.atlas.client.gui.GuiAtlas;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;

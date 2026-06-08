@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:bryce": 1,
+      "navigate:bryce2": 1,
+      "navigate:bryce3": 1,
+      "navigate:bryce4": 1
+    }
+  }
+}

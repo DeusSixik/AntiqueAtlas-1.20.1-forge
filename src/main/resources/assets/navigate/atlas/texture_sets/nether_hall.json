@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:nether_hall": 1
+    },
+    "stitch": {
+      "navigate:nether_wall": "both",
+      "navigate:nether_fort_stairs": "both"
+    }
+  }
+}

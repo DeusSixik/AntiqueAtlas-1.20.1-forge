@@ -1,7 +1,0 @@
-{
-    "priority":  100,
-    "piece_type":  "minecraft:nebs",
-    "setter":  "span_x",
-    "version":  1,
-    "tile":  "antiqueatlas:nether_bridge_x"
-}

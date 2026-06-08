@@ -1,17 +1,17 @@
 package hunternif.mc.impl.atlas.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class DeathMarkerService {
     public static final int DEFAULT_DEATH_MARKER_LIMIT = 5;

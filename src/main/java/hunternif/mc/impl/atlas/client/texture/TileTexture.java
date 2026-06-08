@@ -1,6 +1,5 @@
 package hunternif.mc.impl.atlas.client.texture;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import hunternif.mc.impl.atlas.client.SubTile;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;

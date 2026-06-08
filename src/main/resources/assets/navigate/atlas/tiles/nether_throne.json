@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"texture_set": "navigate:nether_throne",
+	"lod": {
+		"group": "navigate:nether_fortress",
+		"priority": 95
+	}
+}

@@ -1,13 +1,12 @@
 package hunternif.mc.impl.atlas.mixin;
 
-import java.util.List;
-import java.util.Set;
-
+import com.stereowalker.unionlib.forge.PlatformHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import com.stereowalker.unionlib.forge.PlatformHelper;
+import java.util.List;
+import java.util.Set;
 
 public class VolatileMixinPlugin implements IMixinConfigPlugin {
     @Override

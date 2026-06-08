@@ -1,5 +1,7 @@
 package hunternif.mc.impl.atlas.client;
 
+import com.stereowalker.unionlib.resource.ReloadListener;
+import com.stereowalker.unionlib.util.VersionHelper;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import hunternif.mc.impl.atlas.client.texture.TileTexture;
@@ -10,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,9 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-
-import com.stereowalker.unionlib.resource.ReloadListener;
-import com.stereowalker.unionlib.util.VersionHelper;
 
 /**
  * Reads all png files available under assets/(?modid)/textures/gui/tiles/(?tex).png as Textures that

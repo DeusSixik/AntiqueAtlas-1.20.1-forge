@@ -1,7 +1,6 @@
 package hunternif.mc.impl.atlas.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import hunternif.mc.api.client.AtlasClientAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.client.*;
@@ -13,11 +12,8 @@ import hunternif.mc.impl.atlas.client.texture.TileTexture;
 import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.core.WorldData;
 import hunternif.mc.impl.atlas.core.scaning.TileHeightType;
-import hunternif.mc.impl.atlas.event.MarkerClickedCallback;
-import hunternif.mc.impl.atlas.event.MarkerHoveredCallback;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.identity.AtlasReference;
-import hunternif.mc.impl.atlas.identity.AtlasReferenceType;
 import hunternif.mc.impl.atlas.marker.DimensionMarkersData;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
@@ -25,23 +21,10 @@ import hunternif.mc.impl.atlas.network.packet.c2s.play.PutBrowsingPositionC2SPac
 import hunternif.mc.impl.atlas.registry.MarkerRenderInfo;
 import hunternif.mc.impl.atlas.registry.MarkerType;
 import hunternif.mc.impl.atlas.service.DeathMarkerService;
-import hunternif.mc.impl.atlas.util.*;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-
-import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
+import hunternif.mc.impl.atlas.util.ExportImageUtil;
+import hunternif.mc.impl.atlas.util.Log;
+import hunternif.mc.impl.atlas.util.MathUtil;
+import hunternif.mc.impl.atlas.util.Rect;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -59,6 +42,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
+
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class GuiAtlas extends GuiComponent {
     public static final int WIDTH = 310;
@@ -312,6 +302,7 @@ public class GuiAtlas extends GuiComponent {
     private final String[] zoomNames = new String[]{"256", "128", "64", "32", "16", "8", "4", "2", "1", "1/2", "1/4", "1/8", "1/16", "1/32", "1/64", "1/128", "1/256"};
     private BiomeSelectionTarget selectedBiomeTarget;
     private BiomeSelection selectedBiomeSelection;
+    private boolean biomeInspectHeld;
 
     private Thread exportThread;
 
@@ -504,6 +495,7 @@ public class GuiAtlas extends GuiComponent {
         this.player = Minecraft.getInstance().player;
         this.selectedBiomeTarget = null;
         this.selectedBiomeSelection = null;
+        this.biomeInspectHeld = false;
         updateAtlasData();
         if (biomeData != null && !followPlayer && AntiqueAtlas.CONFIG.doSaveBrowsingPos) {
             loadSavedBrowsingPosition();
@@ -582,26 +574,12 @@ public class GuiAtlas extends GuiComponent {
 
         boolean isMouseOverMap = isMouseOverMap(mouseX, mouseY);
 
-        if (mouseState == 1 && state.is(NORMAL) && AntiqueAtlas.CONFIG.enableBiomeInspect && isMouseOverMap) {
-            BiomeInspectInfo info = getBiomeInspectInfo();
-            if (info == null) {
+        if (mouseState == 1 && state.is(NORMAL)) {
+            if (AntiqueAtlas.CONFIG.enableBiomeInspect && isMouseOverMap) {
+                biomeInspectHeld = true;
+                updateHeldBiomeInspect();
                 return true;
             }
-
-            refreshBiomeSelection();
-            if (selectedBiomeSelection != null
-                    && selectedBiomeSelection.contains(info.chunkX(), info.chunkZ())) {
-                selectedBiomeTarget = null;
-                selectedBiomeSelection = null;
-            } else {
-                selectedBiomeTarget = new BiomeSelectionTarget(info.anchorChunkX(), info.anchorChunkZ(), info.biomeId(), info.label());
-                refreshBiomeSelection();
-            }
-            return true;
-        }
-
-        // close atlas with right-click
-        if (mouseState == 1 && state.is(NORMAL)) {
             onClose();
             return true;
         }
@@ -777,6 +755,10 @@ public class GuiAtlas extends GuiComponent {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int mouseState) {
         boolean result = false;
+        if (mouseState == 1) {
+            biomeInspectHeld = false;
+            clearBiomeInspect();
+        }
         if (mouseState != -1) {
             result = selectedButton != null || isDragging;
             selectedButton = null;
@@ -845,6 +827,7 @@ public class GuiAtlas extends GuiComponent {
         }
 
         updateAtlasData();
+        updateHeldBiomeInspect();
     }
 
     /**
@@ -1263,6 +1246,14 @@ public class GuiAtlas extends GuiComponent {
             return null;
         }
 
+        ResourceLocation mappedTile = AntiqueAtlas.tileSelectionRules.resolveBaseBiomeTile(tile);
+        if (mappedTile != null && !mappedTile.equals(tile)) {
+            ResourceLocation resolvedMappedTile = resolveBiomeTileId(mappedTile, biomeRegistry);
+            if (resolvedMappedTile != null) {
+                return resolvedMappedTile;
+            }
+        }
+
         if (biomeRegistry.containsKey(tile)) {
             return tile;
         }
@@ -1303,6 +1294,32 @@ public class GuiAtlas extends GuiComponent {
     private static ResourceLocation getBiomeInspectOverlayTile() {
         ResourceLocation configured = ResourceLocation.tryParse(AntiqueAtlas.CONFIG.biomeInspectTexture);
         return configured != null ? configured : AntiqueAtlas.id("test");
+    }
+
+    private void updateHeldBiomeInspect() {
+        if (!biomeInspectHeld || !AntiqueAtlas.CONFIG.enableBiomeInspect || state.is(EXPORTING_IMAGE)) {
+            clearBiomeInspect();
+            return;
+        }
+
+        BiomeInspectInfo info = getBiomeInspectInfo();
+        if (info == null) {
+            clearBiomeInspect();
+            return;
+        }
+
+        BiomeSelectionTarget nextTarget = new BiomeSelectionTarget(info.anchorChunkX(), info.anchorChunkZ(), info.biomeId(), info.label());
+        if (!nextTarget.equals(selectedBiomeTarget)) {
+            selectedBiomeTarget = nextTarget;
+            refreshBiomeSelection();
+        } else if (selectedBiomeSelection == null) {
+            refreshBiomeSelection();
+        }
+    }
+
+    private void clearBiomeInspect() {
+        selectedBiomeTarget = null;
+        selectedBiomeSelection = null;
     }
 
     private boolean isMouseOverMap(double mouseX, double mouseY) {
@@ -1547,7 +1564,7 @@ public class GuiAtlas extends GuiComponent {
             }
         }
 
-        return Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
+        return Component.translatable("item.navigate.navigation", atlasId);
     }
 
     private static final class SelectedBiomeStorage implements ITileStorage {

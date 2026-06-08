@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:village_path_z": 1
+    },
+    "stitch": {
+      "navigate:village_path_x": "both"
+    }
+  }
+}

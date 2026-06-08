@@ -1,15 +1,11 @@
 package hunternif.mc.impl.atlas.identity;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.UUID;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.saveddata.SavedData;
+
+import java.util.*;
 
 /**
  * Shared atlas directory for the whole save.

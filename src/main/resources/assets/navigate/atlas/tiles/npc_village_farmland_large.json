@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"texture_set": "navigate:farmland_large",
+	"lod": {
+		"group": "navigate:village",
+		"priority": 30
+	}
+}

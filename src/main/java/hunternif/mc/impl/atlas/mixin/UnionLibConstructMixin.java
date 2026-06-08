@@ -1,13 +1,11 @@
 package hunternif.mc.impl.atlas.mixin;
 
+import com.stereowalker.unionlib.forge.PlatformHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import com.stereowalker.unionlib.forge.PlatformHelper;
 
 @Pseudo
 @Mixin(targets = "com.stereowalker.unionlib.UnionLib", remap = false)

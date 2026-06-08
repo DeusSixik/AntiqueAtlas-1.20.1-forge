@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:mesa": 1,
+      "navigate:mesa2": 1,
+      "navigate:mesa3": 1,
+      "navigate:mesa4": 1,
+      "navigate:sand_bushes": 1
+    }
+  }
+}

@@ -10,8 +10,8 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,7 +29,8 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
             return;
         }
 
-        ItemStack atlasIcon = new ItemStack(AntiqueAtlasItems.Items.ATLAS);
+        ItemStack atlasIcon = new ItemStack(AntiqueAtlasItems.Items.EMPTY_ATLAS);
+        ItemStack atlasHoverIcon = new ItemStack(AntiqueAtlasItems.Items.ATLAS);
         Tooltip tooltip = Tooltip.create(getPlayerAtlasTooltip(this.minecraft.player));
         addRenderableWidget(Button.builder(Component.empty(), button -> AntiqueAtlasClientSegment.openAtlasLayer())
                 .bounds(this.leftPos + 128, this.topPos + 61, 18, 18)
@@ -37,7 +38,8 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
                 .build(builder -> new Button(builder) {
                     @Override
                     protected void renderWidget(net.minecraft.client.gui.GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-                        guiGraphics.renderItem(atlasIcon, getX() + 1, getY() + 1);
+                        ItemStack icon = isHoveredOrFocused() ? atlasHoverIcon : atlasIcon;
+                        guiGraphics.renderItem(icon, getX() + 1, getY() + 1);
                     }
                 }));
     }

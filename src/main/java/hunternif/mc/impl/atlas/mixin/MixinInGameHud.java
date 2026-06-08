@@ -1,15 +1,13 @@
 package hunternif.mc.impl.atlas.mixin;
 
+import hunternif.mc.impl.atlas.client.gui.ExportProgressOverlay;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import hunternif.mc.impl.atlas.client.gui.ExportProgressOverlay;
-//import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 
 @Mixin(Gui.class)
 //No longer useful

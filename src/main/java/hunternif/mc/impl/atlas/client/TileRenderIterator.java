@@ -5,6 +5,7 @@ import hunternif.mc.impl.atlas.client.SubTile.Shape;
 import hunternif.mc.impl.atlas.core.ITileStorage;
 import hunternif.mc.impl.atlas.util.Rect;
 import net.minecraft.resources.ResourceLocation;
+
 import java.util.Iterator;
 
 /**

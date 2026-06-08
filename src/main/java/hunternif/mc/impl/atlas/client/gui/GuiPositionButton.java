@@ -1,16 +1,14 @@
 package hunternif.mc.impl.atlas.client.gui;
 
-import java.util.Collections;
-
-import org.lwjgl.opengl.GL11;
-
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import hunternif.mc.impl.atlas.client.Textures;
 import hunternif.mc.impl.atlas.client.gui.core.GuiComponentButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
 
 public class GuiPositionButton extends GuiComponentButton {
     private static final int WIDTH = 11;

@@ -1,18 +1,8 @@
 package hunternif.mc.impl.atlas;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-
 import com.stereowalker.unionlib.api.collectors.ReloadListeners;
 import com.stereowalker.unionlib.resource.ReloadListener;
-
-import hunternif.mc.impl.atlas.client.TextureConfig;
-import hunternif.mc.impl.atlas.client.TextureSetConfig;
-import hunternif.mc.impl.atlas.client.TextureSetMap;
-import hunternif.mc.impl.atlas.client.Textures;
-import hunternif.mc.impl.atlas.client.TileTextureConfig;
-import hunternif.mc.impl.atlas.client.TileTextureMap;
+import hunternif.mc.impl.atlas.client.*;
 import hunternif.mc.impl.atlas.marker.MarkerTextureConfig;
 import hunternif.mc.impl.atlas.registry.MarkerType;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,6 +13,10 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.biome.Biome;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class ClientProxy implements PreparableReloadListener, ReloadListener {
     public void initClient(ReloadListeners reloadListener) {

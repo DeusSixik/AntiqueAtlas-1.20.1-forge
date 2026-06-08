@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:swamp": 3,
+      "navigate:swamp3": 1,
+      "navigate:swamp6": 1
+    },
+    "stitch": {
+      "navigate:swamp_hills": "both",
+      "navigate:swamp": "both",
+      "navigate:water": "both"
+    }
+  }
+}

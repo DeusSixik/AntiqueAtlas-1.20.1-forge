@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"textures": [
+		"navigate:textures/gui/markers/tomb.png"
+	],
+	"title": "Tomb",
+	"default_label": "Tomb"
+}

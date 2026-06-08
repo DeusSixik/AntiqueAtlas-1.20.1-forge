@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:ravine": 1,
+      "navigate:ravine2": 1
+    }
+  }
+}

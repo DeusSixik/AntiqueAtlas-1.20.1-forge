@@ -1,7 +1,0 @@
-{
-    "priority":  50,
-    "piece_type":  "minecraft:nesr",
-    "setter":  "always",
-    "version":  1,
-    "tile":  "antiqueatlas:nether_tower"
-}

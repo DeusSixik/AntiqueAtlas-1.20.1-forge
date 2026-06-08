@@ -1,11 +1,6 @@
 package hunternif.mc.impl.atlas.network.packet.s2c.play;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.stereowalker.unionlib.network.protocol.game.ClientboundUnionPacket;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.core.TileDataStorage;
 import net.minecraft.core.registries.Registries;
@@ -15,6 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used to sync custom tiles from server to client.

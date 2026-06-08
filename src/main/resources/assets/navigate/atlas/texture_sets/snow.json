@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:snow": 5,
+      "navigate:snow1": 3,
+      "navigate:snow2": 3,
+      "navigate:snow3": 1,
+      "navigate:snow4": 1,
+      "navigate:snow5": 1,
+      "navigate:snow6": 1
+    },
+    "stitch": {
+      "navigate:snow_pines": "both",
+      "navigate:snow_hills": "both",
+      "navigate:ice_spikes": "both",
+      "navigate:snow_pines_hills": "both",
+      "navigate:ravine": "both",
+      "navigate:lava": "both",
+      "navigate:water": "both"
+    }
+  }
+}

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import net.minecraft.client.gui.GuiGraphics;
-
 import org.lwjgl.opengl.GL11;
 
 /**

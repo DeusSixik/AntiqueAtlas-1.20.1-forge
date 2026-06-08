@@ -1,8 +1,5 @@
 package hunternif.mc.impl.atlas.service;
 
-import java.util.Collection;
-import java.util.Objects;
-
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.core.AtlasData;
 import hunternif.mc.impl.atlas.core.TileInfo;
@@ -11,6 +8,9 @@ import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DimensionUpdateS2CPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.Collection;
+import java.util.Objects;
 
 public class AtlasScanService {
     private final ActiveAtlasResolver activeAtlasResolver;

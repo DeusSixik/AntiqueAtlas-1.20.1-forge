@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "data": {
+    "textures": {
+      "navigate:ice_spikes": 1,
+      "navigate:ice_spikes2": 1
+    }
+  }
+}

@@ -1,7 +1,6 @@
 package hunternif.mc.impl.atlas.mixin;
 
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
-import hunternif.mc.impl.atlas.mixinhooks.NewServerConnectionCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;

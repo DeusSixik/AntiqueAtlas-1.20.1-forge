@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "source": "global",
+      "priority": 1000
+    },
+    {
+      "source": "biome",
+      "priority": 0
+    },
+    {
+      "source": "global",
+      "priority": 3000,
+      "match": {
+        "tile": "navigate:ruined_portal"
+      }
+    },
+    {
+      "source": "global",
+      "priority": 2500,
+      "dimension": "minecraft:the_nether",
+      "match": {
+        "tile_prefix": "navigate:nether_"
+      }
+    },
+    {
+      "source": "global",
+      "priority": 2000,
+      "match": {
+        "tile_prefix": "navigate:npc_village_"
+      }
+    }
+  ]
+}

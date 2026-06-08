@@ -1,9 +1,8 @@
 package hunternif.mc.impl.atlas.network.packet.s2c.play;
 
 import com.stereowalker.unionlib.network.protocol.game.ClientboundUnionPacket;
-
-import hunternif.mc.impl.atlas.AntiqueAtlasClientSegment;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
+import hunternif.mc.impl.atlas.AntiqueAtlasClientSegment;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
 import net.minecraft.network.FriendlyByteBuf;
