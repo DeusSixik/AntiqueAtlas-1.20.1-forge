@@ -34,7 +34,9 @@ public class AtlasItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return AtlasIdentityService.getDefaultAtlasName(getAtlasID(stack));
+        return AtlasIdentityService.getClientAtlasName(getAtlasID(stack))
+                .<Component>map(Component::literal)
+                .orElseGet(() -> AtlasIdentityService.getDefaultAtlasName(getAtlasID(stack)));
     }
 
     @Override
@@ -46,6 +48,9 @@ public class AtlasItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player playerEntity, InteractionHand hand) {
         ItemStack stack = playerEntity.getItemInHand(hand);
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        }
 
         if (world.isClientSide) {
             AntiqueAtlasClientSegment.openAtlasGUI(stack);
@@ -56,6 +61,10 @@ public class AtlasItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return super.useOn(context);
+        }
+
         if (!context.getLevel().isClientSide()) {
             return super.useOn(context);
         }
@@ -75,6 +84,10 @@ public class AtlasItem extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isEquipped) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return;
+        }
+
         AtlasData data = AntiqueAtlas.tileData.getData(stack, world);
         if (data == null || !(entity instanceof Player)) return;
 

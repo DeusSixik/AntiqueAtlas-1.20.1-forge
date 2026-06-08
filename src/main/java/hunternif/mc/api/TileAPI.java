@@ -20,13 +20,12 @@ public interface TileAPI {
      * tile IDs at shared chunks.
      * </p>
      * <p>
-     * If calling this method on the client, the player must carry the atlas
-     * in his inventory, to prevent griefing!
+     * If calling this method on the client, the player must have access to
+     * the atlas, either via an atlas item or via the built-in player atlas.
      * </p>
      *
      * @param world   dimension the chunk is located in.
-     * @param atlasID the ID of the atlas you want to put marker in. Equal
-     *                to ItemStack damage for ItemAtlas.
+     * @param atlasID the ID of the atlas you want to modify.
      * @param tile    the identifier of the new tile
      * @param chunkX  x chunk coordinate. (block coordinate >> 4)
      * @param chunkZ  z chunk coordinate. (block coordinate >> 4)
@@ -42,8 +41,7 @@ public interface TileAPI {
      * </p>
      *
      * @param world   dimension the chunk is located in.
-     * @param atlasID the ID of the atlas you want to put marker in. Equal
-     *                to ItemStack damage for ItemAtlas.
+     * @param atlasID the ID of the atlas you want to read from.
      * @param chunkX  x chunk coordinate. (block coordinate >> 4)
      * @param chunkZ  z chunk coordinate. (block coordinate >> 4)
      * @return the identifier of the requested tile

@@ -20,15 +20,14 @@ public interface MarkerAPI {
      * coordinates. Call this method per one marker either on the server or
      * on the client.
      * <p>
-     * If calling this method on the client, the player must carry the atlas
-     * in his inventory, to prevent griefing!
+     * If calling this method on the client, the player must have access to
+     * the atlas, either via an atlas item or via the built-in player atlas.
      * </p>
      *
      * @param world
      * @param visibleAhead whether the marker should appear visible even if
      *                     the player hasn't yet discovered that area.
-     * @param atlasID      the ID of the atlas you want to put marker in. Equal
-     *                     to ItemStack damage for ItemAtlas.
+     * @param atlasID      the ID of the atlas you want to put marker in.
      * @param marker       name of your custom marker type.
      * @param label        text label to be displayed on mouseover.
      * @param x            block coordinate
@@ -58,7 +57,8 @@ public interface MarkerAPI {
      * Delete a marker from an atlas.
      * <p>
      * If calling this method on the client,
-     * the player must carry the atlas in his inventory, to prevent griefing!
+     * the player must have access to the atlas, either via an atlas item or
+     * via the built-in player atlas.
      * </p>
      *
      * @param world

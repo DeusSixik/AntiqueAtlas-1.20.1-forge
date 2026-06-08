@@ -23,6 +23,9 @@ public class EmptyAtlasItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level world, Player player,
                                             InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return new InteractionResultHolder<>(InteractionResult.PASS, stack);
+        }
         if (world.isClientSide()) {
             world.playSound(player, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1F, 1F);
             return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);

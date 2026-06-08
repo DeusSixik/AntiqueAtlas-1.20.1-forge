@@ -57,7 +57,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 
@@ -293,7 +292,6 @@ public class GuiAtlas extends GuiComponent {
 
     private Player player;
     private AtlasReference atlasReference;
-    private ItemStack stack = ItemStack.EMPTY;
     private WorldData biomeData;
 
     /**
@@ -452,15 +450,8 @@ public class GuiAtlas extends GuiComponent {
         state.switchTo(NORMAL);
     }
 
-    public GuiAtlas prepareToOpen(AtlasReference atlasReference, ItemStack stack) {
-        this.atlasReference = atlasReference;
-        this.stack = stack;
-        return prepareToOpenInternal();
-    }
-
     public GuiAtlas prepareToOpen(AtlasReference atlasReference) {
         this.atlasReference = atlasReference;
-        this.stack = ItemStack.EMPTY;
         return prepareToOpenInternal();
     }
 
@@ -1066,7 +1057,7 @@ public class GuiAtlas extends GuiComponent {
         renderMarkers(matrices, markersStartX, markersStartZ, markersEndX, markersEndZ, localMarkersData);
 
         if (state.is(NORMAL) && AntiqueAtlas.CONFIG.enableBiomeInspect && selectedBiomeSelection != null) {
-            renderBiomeInspect(matrices);
+            renderBiomeInspect(matrices, mapStartX, mapStartZ, mapEndX, mapEndZ, mapStartScreenX, mapStartScreenY);
         }
 
         RenderSystem.disableScissor();
@@ -1126,21 +1117,19 @@ public class GuiAtlas extends GuiComponent {
         }
     }
 
-    private void renderBiomeInspect(GuiGraphics matrices) {
+    private void renderBiomeInspect(GuiGraphics matrices,
+                                    int mapStartX, int mapStartZ, int mapEndX, int mapEndZ,
+                                    int mapStartScreenX, int mapStartScreenY) {
         if (selectedBiomeSelection == null) {
             return;
         }
 
         TileRenderIterator tiles = new TileRenderIterator(new SelectedBiomeStorage(selectedBiomeSelection));
-        tiles.setScope(selectedBiomeSelection.scope());
+        tiles.setScope(new Rect(mapStartX, mapStartZ, mapEndX, mapEndZ));
         tiles.setStep(selectedBiomeSelection.step());
 
         matrices.pose().pushPose();
-        matrices.pose().translate(
-                worldXToScreenX(selectedBiomeSelection.scope().minX * 16),
-                worldZToScreenY(selectedBiomeSelection.scope().minY * 16),
-                0
-        );
+        matrices.pose().translate(mapStartScreenX, mapStartScreenY, 0);
 
         RenderSystem.setShaderColor(1, 1, 1, 0.65f);
         for (SubTileQuartet subtiles : tiles) {
@@ -1204,9 +1193,9 @@ public class GuiAtlas extends GuiComponent {
                 player.getCommandSenderWorld().dimension().location()
         );
         Rect storageScope = storage.getScope();
-        int alignedChunkX = Math.floorDiv(target.anchorChunkX(), tile2ChunkScale) * tile2ChunkScale;
-        int alignedChunkZ = Math.floorDiv(target.anchorChunkZ(), tile2ChunkScale) * tile2ChunkScale;
-        ResourceLocation anchorBiomeId = resolveBiomeTileId(storage.getTile(alignedChunkX, alignedChunkZ), biomeRegistry);
+        int anchorChunkX = Math.floorDiv(target.anchorChunkX(), tile2ChunkScale) * tile2ChunkScale;
+        int anchorChunkZ = Math.floorDiv(target.anchorChunkZ(), tile2ChunkScale) * tile2ChunkScale;
+        ResourceLocation anchorBiomeId = resolveBiomeTileId(storage.getTile(anchorChunkX, anchorChunkZ), biomeRegistry);
         if (!target.biomeId().equals(anchorBiomeId)) {
             return null;
         }
@@ -1214,8 +1203,8 @@ public class GuiAtlas extends GuiComponent {
         Set<Long> selectedCells = new HashSet<>();
         Set<Long> visited = new HashSet<>();
         Deque<Long> queue = new ArrayDeque<>();
-        Rect bounds = new Rect(alignedChunkX, alignedChunkZ, alignedChunkX, alignedChunkZ);
-        queue.add(pack(alignedChunkX, alignedChunkZ));
+        Rect bounds = new Rect(anchorChunkX, anchorChunkZ, anchorChunkX, anchorChunkZ);
+        queue.add(pack(anchorChunkX, anchorChunkZ));
 
         while (!queue.isEmpty()) {
             long packed = queue.removeFirst();
@@ -1551,10 +1540,6 @@ public class GuiAtlas extends GuiComponent {
 
     private Component getAtlasTitle() {
         int atlasId = getAtlasID();
-        if (!stack.isEmpty() && stack.hasCustomHoverName()) {
-            return stack.getHoverName().copy();
-        }
-
         if (player != null) {
             Optional<String> atlasName = AtlasIdentityService.getAtlasName(player.level(), atlasId);
             if (atlasName.isPresent()) {
@@ -1562,13 +1547,7 @@ public class GuiAtlas extends GuiComponent {
             }
         }
 
-        if (atlasReference != null && atlasReference.type() == AtlasReferenceType.PLAYER) {
-            return Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
-        }
-
-        return AntiqueAtlas.CONFIG.enableItemAtlas && !stack.isEmpty()
-                ? stack.getHoverName().copy()
-                : Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
+        return Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
     }
 
     private static final class SelectedBiomeStorage implements ITileStorage {

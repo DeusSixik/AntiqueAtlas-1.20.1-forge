@@ -1,6 +1,7 @@
 package hunternif.mc.impl.atlas.mixin;
 
 import hunternif.mc.api.AtlasAPI;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -35,6 +36,10 @@ public abstract class MixinCartographyTableScreenHandler extends AbstractContain
     // inject into lambda inside CartographyTableScreenHandler::updateResult
     @Inject(method = {"lambda$setupResultSlot$0", "method_17382", "m_39166_"}, at = @At("HEAD"), cancellable = true)
     void antiqueatlas_call(ItemStack map, ItemStack atlas, ItemStack result, Level world, BlockPos pos, CallbackInfo info) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return;
+        }
+
         if (atlas.getItem() == AtlasAPI.getAtlasItem() && map.getItem() == Items.FILLED_MAP) {
             this.resultInventory.setItem(CartographyTableMenu.RESULT_SLOT, atlas.copy());
 
@@ -46,6 +51,10 @@ public abstract class MixinCartographyTableScreenHandler extends AbstractContain
 
     @Inject(method = "transferSlot", at = @At("HEAD"), cancellable = true)
     void antiqueatlas_transferSlot(Player player, int index, CallbackInfoReturnable<ItemStack> info) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return;
+        }
+
         if (index >= 0 && index <= 2) return;
 
         Slot slot = this.slots.get(index);

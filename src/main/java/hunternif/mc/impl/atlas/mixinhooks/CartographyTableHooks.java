@@ -2,6 +2,7 @@ package hunternif.mc.impl.atlas.mixinhooks;
 
 import hunternif.mc.api.AtlasAPI;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.item.AtlasItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class CartographyTableHooks {
     public static void onTakeItem(Player player, ItemStack map, ItemStack atlas) {
-        if (player.getCommandSenderWorld().isClientSide()) {
+        if (player.getCommandSenderWorld().isClientSide() || !AtlasIdentityService.isItemAtlasEnabled()) {
             return;
         }
 

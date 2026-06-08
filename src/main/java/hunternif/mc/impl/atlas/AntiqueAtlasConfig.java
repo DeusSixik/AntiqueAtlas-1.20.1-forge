@@ -21,7 +21,7 @@ public class AntiqueAtlasConfig implements ConfigObject {
 
     @UnionConfig.Entry(group = "Gameplay", name = "showDeathMarkers",
     		translatable = "text.autoconfig.antiqueatlas.option.showDeathMarkers", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Whether death markers are visible on the atlas, minimap and exports."})
+    @UnionConfig.Comment(comment = {"Whether death markers are visible on the atlas and exports."})
     public boolean showDeathMarkers = true;
 
     @UnionConfig.Entry(group = "Gameplay", name = "deathMarkerLimit",
@@ -48,11 +48,6 @@ public class AntiqueAtlasConfig implements ConfigObject {
     		translatable = "text.autoconfig.antiqueatlas.option.biomeInspectTexture", side = ConfigSide.Shared)
     @UnionConfig.Comment(comment = {"Texture set tile id used for biome inspect overlay. Example: antiqueatlas:test"})
     public String biomeInspectTexture = "antiqueatlas:test";
-
-    @UnionConfig.Entry(group = "Gameplay", name = "minimap", 
-    		translatable = "text.autoconfig.antiqueatlas.option.minimap", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Show a minimap if held in the mainhand"})
-    public boolean minimap = false;
 
     //============ Interface settings =============
     @UnionConfig.Entry(group = "User Interface", name = "doScaleMarkers", 

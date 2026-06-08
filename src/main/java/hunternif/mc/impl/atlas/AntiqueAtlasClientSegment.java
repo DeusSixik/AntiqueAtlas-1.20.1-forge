@@ -1,8 +1,6 @@
 package hunternif.mc.impl.atlas;
 
 import com.stereowalker.unionlib.api.collectors.InsertCollector;
-import com.stereowalker.unionlib.api.collectors.OverlayCollector;
-import com.stereowalker.unionlib.api.collectors.OverlayCollector.Order;
 import com.stereowalker.unionlib.api.keymaps.KeyMappingCollector;
 import com.stereowalker.unionlib.client.gui.screens.config.ConfigScreen;
 import com.stereowalker.unionlib.insert.ClientInserts;
@@ -10,10 +8,7 @@ import com.stereowalker.unionlib.mod.ClientSegment;
 import com.stereowalker.unionlib.util.VersionHelper;
 
 import hunternif.mc.impl.atlas.client.KeyHandler;
-import hunternif.mc.impl.atlas.client.OverlayRenderer;
-import hunternif.mc.impl.atlas.client.gui.ExportProgressOverlay;
 import hunternif.mc.impl.atlas.client.gui.GuiAtlas;
-import hunternif.mc.impl.atlas.identity.AtlasReference;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -39,7 +34,7 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
         }
 
         AtlasIdentityService.resolveAtlasReference(mc.player, stack)
-                .ifPresent(reference -> openAtlasScreen(getAtlasGUI().prepareToOpen(reference, stack)));
+                .ifPresent(reference -> openAtlasScreen(getAtlasGUI().prepareToOpen(reference)));
     }
 
     public static void openAtlasGUI() {
@@ -102,21 +97,6 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
 		collector.addInsert(ClientInserts.CLIENT_TICK_FINISH, ()->{
 			if (AtlasIdentityService.isPlayerAtlasEnabled()) {
 				KeyHandler.onClientTick(Minecraft.getInstance());
-			}
-		});
-	}
-	
-	private OverlayRenderer atlasOverlayRenderer = new OverlayRenderer();
-	@Override
-	public void setupGuiOverlays(OverlayCollector collector) {
-		collector.register("atlas", Order.END, (gui, renderer, scaledWidth, scaledHeight) -> {
-			if (Minecraft.getInstance().screen == null && AntiqueAtlas.CONFIG.minimap) {
-				float height = ((218f /* 0.2f*/) / scaledHeight);
-				float width = ((310f /* 0.2f*/) / scaledWidth);
-				renderer.poseStack().pushPose();
-				renderer.poseStack().scale(54.5f / 218f, 77.5f / 310f, -1f);
-				atlasOverlayRenderer.drawOverlay(renderer.poseStack(), renderer.guiGraphics().bufferSource(), 15728880, Minecraft.getInstance().player.getMainHandItem());
-				renderer.poseStack().popPose();
 			}
 		});
 	}

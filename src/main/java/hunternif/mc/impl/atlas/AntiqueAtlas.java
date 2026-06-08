@@ -37,6 +37,7 @@ import hunternif.mc.impl.atlas.network.packet.s2c.play.MapDataS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutGlobalTileS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutTileS2CPacket;
+import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncAtlasNameS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncPlayerAtlasIdS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.TileGroupsS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.UpdateMarkerS2CPacket;
@@ -195,6 +196,7 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 		collector.registerClientboundPacket(MapDataS2CPacket.ID, MapDataS2CPacket.class, MapDataS2CPacket::new);
 		collector.registerClientboundPacket(PutMarkersS2CPacket.ID, PutMarkersS2CPacket.class, PutMarkersS2CPacket::new);
 		collector.registerClientboundPacket(PutTileS2CPacket.ID, PutTileS2CPacket.class, PutTileS2CPacket::new);
+		collector.registerClientboundPacket(SyncAtlasNameS2CPacket.ID, SyncAtlasNameS2CPacket.class, SyncAtlasNameS2CPacket::new);
 		collector.registerClientboundPacket(SyncPlayerAtlasIdS2CPacket.ID, SyncPlayerAtlasIdS2CPacket.class, SyncPlayerAtlasIdS2CPacket::new);
 		collector.registerClientboundPacket(TileGroupsS2CPacket.ID, TileGroupsS2CPacket.class, TileGroupsS2CPacket::new);
 		collector.registerClientboundPacket(UpdateMarkerS2CPacket.ID, UpdateMarkerS2CPacket.class, UpdateMarkerS2CPacket::new);

@@ -52,8 +52,24 @@ public class AtlasAPI {
      * Convenience method that returns a list of atlas IDs that are currently
      * active for the player, including the built-in atlas when enabled.
      **/
-    public static List<Integer> getPlayerAtlases(Player player) {
+    public static List<Integer> getAccessibleAtlases(Player player) {
         List<Integer> atlasIds = AntiqueAtlas.activeAtlasResolver.getActiveAtlasIds(player);
         return atlasIds.isEmpty() ? Collections.emptyList() : atlasIds;
+    }
+
+    /**
+     * @deprecated use {@link #getAccessibleAtlases(Player)}.
+     */
+    @Deprecated
+    public static List<Integer> getPlayerAtlases(Player player) {
+        return getAccessibleAtlases(player);
+    }
+
+    /**
+     * Convenience method that checks whether the player currently has access
+     * to the atlas, either via an atlas item or via the built-in player atlas.
+     */
+    public static boolean hasAccessToAtlas(Player player, int atlasId) {
+        return AntiqueAtlas.activeAtlasResolver.isAtlasActiveForPlayer(player, atlasId);
     }
 }

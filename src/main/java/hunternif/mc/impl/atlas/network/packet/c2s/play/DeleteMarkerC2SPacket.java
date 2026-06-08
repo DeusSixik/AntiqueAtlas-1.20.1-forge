@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 public class DeleteMarkerC2SPacket extends ServerboundUnionPacket {
 	public static final ResourceLocation ID = AntiqueAtlas.id("packet", "c2s", "marker", "delete");
 
-	private static final int GLOBAL = -1;
 	int atlasID, markerID;
 	
 	public DeleteMarkerC2SPacket(int atlasID, int markerID) {
@@ -41,8 +40,8 @@ public class DeleteMarkerC2SPacket extends ServerboundUnionPacket {
 
 	@Override
 	public boolean handleOnServer(ServerPlayer sender) {
-		if (!AtlasAPI.getPlayerAtlases(sender).contains(atlasID)) {
-			Log.warn("Player %s attempted to delete marker from someone else's Atlas #%d",
+		if (!AtlasAPI.hasAccessToAtlas(sender, atlasID)) {
+			Log.warn("Player %s attempted to delete marker from inaccessible Atlas #%d",
 					sender.getName(), atlasID);
 			return true;
 		}

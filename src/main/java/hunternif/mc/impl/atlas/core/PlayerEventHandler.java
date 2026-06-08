@@ -15,6 +15,9 @@ public class PlayerEventHandler {
         }
 
         AntiqueAtlas.atlasScanService.syncActiveAtlasesToPlayer(player);
+        for (int atlasId : AntiqueAtlas.activeAtlasResolver.getActiveAtlasIds(player)) {
+            AtlasIdentityService.syncAtlasNameToPlayer(player, atlasId);
+        }
     }
 
     public static void onPlayerTick(Player player) {

@@ -42,6 +42,9 @@ public class RecipeAtlasCombining extends CustomRecipe {
 
     @Override
     public boolean matches(CraftingContainer inv, Level world) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return false;
+        }
         return matches(inv);
     }
 
@@ -61,6 +64,10 @@ public class RecipeAtlasCombining extends CustomRecipe {
     
     @Override
     public ItemStack assemble(CraftingContainer inv, RegistryAccess provider) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return ItemStack.EMPTY;
+        }
+
         ItemStack firstAtlas = ItemStack.EMPTY;
         Set<Integer> atlasIds = new LinkedHashSet<>(9);
         int atlasCount = 0;
@@ -121,7 +128,7 @@ public class RecipeAtlasCombining extends CustomRecipe {
     }
 
     public static void finalizeCombination(Level world, ItemStack result) {
-        if (world.isClientSide || result.isEmpty() || !hasPendingCombination(result)) {
+        if (world.isClientSide || result.isEmpty() || !hasPendingCombination(result) || !AtlasIdentityService.isItemAtlasEnabled()) {
             return;
         }
 

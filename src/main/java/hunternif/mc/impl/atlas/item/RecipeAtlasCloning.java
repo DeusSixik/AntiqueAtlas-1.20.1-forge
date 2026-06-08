@@ -25,6 +25,10 @@ public class RecipeAtlasCloning extends CustomRecipe {
 
     @Override
     public boolean matches(CraftingContainer inv, Level world) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return false;
+        }
+
         int i = 0; // number of empty atlases
         ItemStack filledAtlas = ItemStack.EMPTY;
 
@@ -51,6 +55,10 @@ public class RecipeAtlasCloning extends CustomRecipe {
 
     @Override
     public ItemStack assemble(CraftingContainer inv, RegistryAccess provider) {
+        if (!AtlasIdentityService.isItemAtlasEnabled()) {
+            return ItemStack.EMPTY;
+        }
+
         int i = 0; // number of new copies
         ItemStack filledAtlas = ItemStack.EMPTY;
 
