@@ -3,6 +3,7 @@ package hunternif.mc.impl.atlas.structure;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +20,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -32,8 +32,8 @@ import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 
 public class StructureHandler {
-    private static final HashMultimap<ResourceLocation, Tuple<ResourceLocation, Setter>> STRUCTURE_PIECE_TO_TILE_MAP = HashMultimap.create();
-    private static final Multimap<ResourceLocation, Tuple<ResourceLocation, Setter>> JIGSAW_TO_TILE_MAP = HashMultimap.create();
+    private static final HashMultimap<ResourceLocation, RegisteredTile> STRUCTURE_PIECE_TO_TILE_MAP = HashMultimap.create();
+    private static final Multimap<ResourceLocation, RegisteredTile> JIGSAW_TO_TILE_MAP = HashMultimap.create();
     private static final Map<ResourceLocation, Integer> STRUCTURE_PIECE_TILE_PRIORITY = new HashMap<>();
     private static final Set<ResourceLocation> LOGGED_MISSING_STRUCTURE_PIECES = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private static final Set<ResourceLocation> LOGGED_MISSING_JIGSAW_PATTERNS = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -126,27 +126,43 @@ public class StructureHandler {
         LOGGED_MISSING_JIGSAW_PATTERNS.clear();
     }
 
+    public static void registerTile(ResourceLocation structurePieceId, int priority, List<ResourceLocation> textureIds, Setter setter) {
+        STRUCTURE_PIECE_TO_TILE_MAP.put(structurePieceId, new RegisteredTile(List.copyOf(textureIds), setter));
+        for (ResourceLocation textureId : textureIds) {
+            STRUCTURE_PIECE_TILE_PRIORITY.put(textureId, priority);
+        }
+    }
+
     public static void registerTile(ResourceLocation structurePieceId, int priority, ResourceLocation textureId, Setter setter) {
-        STRUCTURE_PIECE_TO_TILE_MAP.put(structurePieceId, new Tuple<>(textureId, setter));
-        STRUCTURE_PIECE_TILE_PRIORITY.put(textureId, priority);
+        registerTile(structurePieceId, priority, Collections.singletonList(textureId), setter);
     }
 
     public static void registerTile(ResourceLocation structurePieceId, int priority, ResourceLocation textureId) {
         registerTile(structurePieceId, priority, textureId, ALWAYS);
     }
 
-    public static void registerTile(StructurePieceType structurePieceType, int priority, ResourceLocation textureId, Setter setter) {
+    public static void registerTile(StructurePieceType structurePieceType, int priority, List<ResourceLocation> textureIds, Setter setter) {
         ResourceLocation id = BuiltInRegistries.STRUCTURE_PIECE.getKey(structurePieceType);
-        registerTile(id, priority, textureId, setter);
+        registerTile(id, priority, textureIds, setter);
+    }
+
+    public static void registerTile(StructurePieceType structurePieceType, int priority, ResourceLocation textureId, Setter setter) {
+        registerTile(structurePieceType, priority, Collections.singletonList(textureId), setter);
     }
 
     public static void registerTile(StructurePieceType structurePieceType, int priority, ResourceLocation textureId) {
         registerTile(structurePieceType, priority, textureId, ALWAYS);
     }
 
+    public static void registerJigsawTile(ResourceLocation jigsawPattern, int priority, List<ResourceLocation> tileIds, Setter setter) {
+        JIGSAW_TO_TILE_MAP.put(jigsawPattern, new RegisteredTile(List.copyOf(tileIds), setter));
+        for (ResourceLocation tileId : tileIds) {
+            STRUCTURE_PIECE_TILE_PRIORITY.put(tileId, priority);
+        }
+    }
+
     public static void registerJigsawTile(ResourceLocation jigsawPattern, int priority, ResourceLocation tileID, Setter setter) {
-        JIGSAW_TO_TILE_MAP.put(jigsawPattern, new Tuple<>(tileID, setter));
-        STRUCTURE_PIECE_TILE_PRIORITY.put(tileID, priority);
+        registerJigsawTile(jigsawPattern, priority, Collections.singletonList(tileID), setter);
     }
 
     public static void registerJigsawTile(ResourceLocation jigsawPattern, int priority, ResourceLocation tileID) {
@@ -194,6 +210,29 @@ public class StructureHandler {
         }
     }
 
+    private static ResourceLocation chooseTileVariant(ServerLevel world, BoundingBox box, ResourceLocation mappingId, List<ResourceLocation> tileIds) {
+        if (tileIds.isEmpty()) {
+            return null;
+        }
+        if (tileIds.size() == 1) {
+            return tileIds.get(0);
+        }
+
+        long hash = world.getSeed();
+        hash = hash * 31L + box.getCenter().getX();
+        hash = hash * 31L + box.getCenter().getY();
+        hash = hash * 31L + box.getCenter().getZ();
+        hash = hash * 31L + box.getXSpan();
+        hash = hash * 31L + box.getYSpan();
+        hash = hash * 31L + box.getZSpan();
+        if (mappingId != null) {
+            hash = hash * 31L + mappingId.hashCode();
+        }
+
+        int index = Math.floorMod((int) (hash ^ (hash >>> 32)), tileIds.size());
+        return tileIds.get(index);
+    }
+
     private static void resolveJigsaw(StructurePiece jigsawPiece, ServerLevel world) {
         if (jigsawPiece instanceof PoolElementStructurePiece pool) {
             if (pool.getElement() instanceof SinglePoolElement singlePoolElement) {
@@ -201,15 +240,17 @@ public class StructureHandler {
 
                 if (left.isPresent()) {
                     ResourceLocation templateId = left.get();
-                    Collection<Tuple<ResourceLocation, Setter>> entries = JIGSAW_TO_TILE_MAP.get(templateId);
+                    Collection<RegisteredTile> entries = JIGSAW_TO_TILE_MAP.get(templateId);
                     if (entries.isEmpty()) {
                         logMissingJigsawPattern(templateId, jigsawPiece, world);
                     }
 
-                    for (Tuple<ResourceLocation, Setter> entry : entries) {
-                        ResourceLocation tile = entry.getA();
-                        Setter setter = entry.getB();
-                        for (ChunkPos pos : setter.matches(world, singlePoolElement, pool.getBoundingBox(), jigsawPiece)) {
+                    for (RegisteredTile entry : entries) {
+                        ResourceLocation tile = chooseTileVariant(world, pool.getBoundingBox(), templateId, entry.tiles());
+                        if (tile == null) {
+                            continue;
+                        }
+                        for (ChunkPos pos : entry.setter().matches(world, singlePoolElement, pool.getBoundingBox(), jigsawPiece)) {
                             put(world, pos.x, pos.z, tile);
                         }
                     }
@@ -228,16 +269,20 @@ public class StructureHandler {
 
         ResourceLocation structurePieceId = world.registryAccess().registryOrThrow(Registries.STRUCTURE_PIECE).getKey(structurePiece.getType());
         if (STRUCTURE_PIECE_TO_TILE_MAP.containsKey(structurePieceId)) {
-            for (Tuple<ResourceLocation, Setter> entry : STRUCTURE_PIECE_TO_TILE_MAP.get(structurePieceId)) {
+            for (RegisteredTile entry : STRUCTURE_PIECE_TO_TILE_MAP.get(structurePieceId)) {
                 Collection<ChunkPos> matches;
                 if (structurePiece instanceof PoolElementStructurePiece pool) {
-                    matches = entry.getB().matches(world, pool.getElement(), pool.getBoundingBox(), structurePiece);
+                    matches = entry.setter().matches(world, pool.getElement(), pool.getBoundingBox(), structurePiece);
                 } else {
-                    matches = entry.getB().matches(world, null, structurePiece.getBoundingBox(), structurePiece);
+                    matches = entry.setter().matches(world, null, structurePiece.getBoundingBox(), structurePiece);
                 }
 
+                ResourceLocation tile = chooseTileVariant(world, structurePiece.getBoundingBox(), structurePieceId, entry.tiles());
+                if (tile == null) {
+                    continue;
+                }
                 for (ChunkPos pos : matches) {
-                    put(world, pos.x, pos.z, entry.getA());
+                    put(world, pos.x, pos.z, tile);
                 }
             }
         } else {
@@ -294,5 +339,11 @@ public class StructureHandler {
 
     interface Setter {
         Collection<ChunkPos> matches(Level world, StructurePoolElement element, BoundingBox box, StructurePiece rotation);
+    }
+
+    private record RegisteredTile(List<ResourceLocation> tiles, Setter setter) {
+        private RegisteredTile {
+            tiles = List.copyOf(new ArrayList<>(tiles));
+        }
     }
 }

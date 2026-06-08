@@ -12,6 +12,8 @@ import java.util.concurrent.Executor;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.stereowalker.unionlib.resource.ReloadListener;
 import com.stereowalker.unionlib.util.VersionHelper;
 
@@ -45,10 +47,10 @@ public class StructurePieceConfig implements ResourceReloadListener<List<Structu
                     }
 
                     ResourceLocation pieceTypeId = VersionHelper.toLoc(object.getAsJsonPrimitive("piece_type").getAsString());
-                    ResourceLocation tileId = VersionHelper.toLoc(object.getAsJsonPrimitive("tile").getAsString());
+                    List<ResourceLocation> tileIds = readTiles(object, resourceId, "tile", "tiles");
                     int priority = object.getAsJsonPrimitive("priority").getAsInt();
                     StructureHandler.Setter setter = readSetter(object, resourceId);
-                    entries.add(new EntryData(pieceTypeId, tileId, priority, setter));
+                    entries.add(new EntryData(pieceTypeId, tileIds, priority, setter));
                 } catch (Exception e) {
                     AntiqueAtlas.LOG.warn("Error reading structure piece config {}!", resourceId, e);
                 }
@@ -66,12 +68,37 @@ public class StructurePieceConfig implements ResourceReloadListener<List<Structu
         return StructureHandler.setterByName(object.getAsJsonPrimitive("setter").getAsString(), resourceId);
     }
 
+    private List<ResourceLocation> readTiles(JsonObject object, ResourceLocation resourceId, String singleKey, String multiKey) {
+        List<ResourceLocation> tiles = new ArrayList<>();
+        JsonArray array = object.getAsJsonArray(multiKey);
+        if (array != null) {
+            for (JsonElement element : array) {
+                ResourceLocation tileId = VersionHelper.toLoc(element.getAsString());
+                if (tileId == null) {
+                    throw new IllegalArgumentException("Invalid tile id in `" + multiKey + "`: " + element);
+                }
+                tiles.add(tileId);
+            }
+        } else if (object.has(singleKey)) {
+            ResourceLocation tileId = VersionHelper.toLoc(object.getAsJsonPrimitive(singleKey).getAsString());
+            if (tileId != null) {
+                tiles.add(tileId);
+            }
+        }
+
+        if (tiles.isEmpty()) {
+            throw new IllegalArgumentException("Missing `" + singleKey + "` or non-empty `" + multiKey + "` in " + resourceId);
+        }
+
+        return List.copyOf(tiles);
+    }
+
     @Override
     public CompletableFuture<Void> apply(List<EntryData> entries, ResourceManager manager, ProfilerFiller profiler, Executor executor) {
         return CompletableFuture.runAsync(() -> {
             StructureHandler.clearStructurePieceTileRegistrations();
             for (EntryData entry : entries) {
-                StructureHandler.registerTile(entry.pieceTypeId(), entry.priority(), entry.tileId(), entry.setter());
+                StructureHandler.registerTile(entry.pieceTypeId(), entry.priority(), entry.tileIds(), entry.setter());
             }
         }, executor);
     }
@@ -88,7 +115,7 @@ public class StructurePieceConfig implements ResourceReloadListener<List<Structu
 
     public record EntryData(
             ResourceLocation pieceTypeId,
-            ResourceLocation tileId,
+            List<ResourceLocation> tileIds,
             int priority,
             StructureHandler.Setter setter
     ) {}

@@ -3,15 +3,19 @@ package hunternif.mc.impl.atlas.structure;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stereowalker.unionlib.resource.ReloadListener;
@@ -40,15 +44,15 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
 
         if (version == 1) {
             return new StructurePieceTile(
-                    ResourceLocation.tryParse(json.get("tile").getAsString()),
+                    readTiles(json, resourceId, "tile", "tiles"),
                     json.get("priority").getAsInt(),
                     readSetter(json, "setter", StructureHandler.ALWAYS, resourceId)
             );
         } else if (version == 2) {
             return new StructurePieceTileXZ(
-                    ResourceLocation.tryParse(json.get("tile_x").getAsString()),
+                    readTiles(json, resourceId, "tile_x", "tiles_x"),
                     readSetter(json, "setter_x", readSetter(json, "setter", StructureHandler::IF_X_DIRECTION, resourceId), resourceId),
-                    ResourceLocation.tryParse(json.get("tile_z").getAsString()),
+                    readTiles(json, resourceId, "tile_z", "tiles_z"),
                     readSetter(json, "setter_z", readSetter(json, "setter", StructureHandler::IF_Z_DIRECTION, resourceId), resourceId),
                     json.get("priority").getAsInt()
             );
@@ -63,6 +67,31 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
         }
 
         return StructureHandler.setterByName(json.getAsJsonPrimitive(key).getAsString(), resourceId);
+    }
+
+    private static List<ResourceLocation> readTiles(JsonObject json, ResourceLocation resourceId, String singleKey, String multiKey) {
+        List<ResourceLocation> tiles = new ArrayList<>();
+        JsonArray array = json.getAsJsonArray(multiKey);
+        if (array != null) {
+            for (JsonElement element : array) {
+                ResourceLocation tileId = ResourceLocation.tryParse(element.getAsString());
+                if (tileId == null) {
+                    throw new IllegalArgumentException("Invalid tile id in `" + multiKey + "`: " + element);
+                }
+                tiles.add(tileId);
+            }
+        } else if (json.has(singleKey)) {
+            ResourceLocation tileId = ResourceLocation.tryParse(json.getAsJsonPrimitive(singleKey).getAsString());
+            if (tileId != null) {
+                tiles.add(tileId);
+            }
+        }
+
+        if (tiles.isEmpty()) {
+            throw new IllegalArgumentException("Missing `" + singleKey + "` or non-empty `" + multiKey + "` in " + resourceId);
+        }
+
+        return List.copyOf(tiles);
     }
 
     @Override
@@ -109,10 +138,10 @@ public class JigsawConfig implements ResourceReloadListener<Map<ResourceLocation
 
                 AntiqueAtlas.LOG.info("Apply structure piece config: " + id);
                 if (piece instanceof StructurePieceTileXZ) {
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileX(), piece.getSetterX());
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTileZ(), piece.getSetterZ());
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTilesX(), piece.getSetterX());
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTilesZ(), piece.getSetterZ());
                 } else {
-                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTile(), piece.getSetter());
+                    StructureHandler.registerJigsawTile(id, piece.getPriority(), piece.getTiles(), piece.getSetter());
                 }
             });
         }, executor);

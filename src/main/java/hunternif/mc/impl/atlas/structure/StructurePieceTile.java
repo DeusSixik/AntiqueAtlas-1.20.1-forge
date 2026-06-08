@@ -1,29 +1,43 @@
 package hunternif.mc.impl.atlas.structure;
 
+import java.util.List;
+
 import net.minecraft.resources.ResourceLocation;
 
 public class StructurePieceTile {
 
-    private final ResourceLocation tile;
+    private final List<ResourceLocation> tiles;
     private final int priority;
     private final StructureHandler.Setter setter;
 
-    public StructurePieceTile(ResourceLocation tile, int priority, StructureHandler.Setter setter) {
-        this.tile = tile;
+    public StructurePieceTile(List<ResourceLocation> tiles, int priority, StructureHandler.Setter setter) {
+        this.tiles = List.copyOf(tiles);
         this.priority = priority;
         this.setter = setter;
     }
 
     public ResourceLocation getTile() {
-        return tile;
+        return tiles.get(0);
+    }
+
+    public List<ResourceLocation> getTiles() {
+        return tiles;
     }
 
     public ResourceLocation getTileX() {
-        return tile;
+        return getTile();
+    }
+
+    public List<ResourceLocation> getTilesX() {
+        return tiles;
     }
 
     public ResourceLocation getTileZ() {
-        return tile;
+        return getTile();
+    }
+
+    public List<ResourceLocation> getTilesZ() {
+        return tiles;
     }
 
     public StructureHandler.Setter getSetter() {
