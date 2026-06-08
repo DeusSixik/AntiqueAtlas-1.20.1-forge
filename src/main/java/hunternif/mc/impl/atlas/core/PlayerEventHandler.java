@@ -10,7 +10,8 @@ public class PlayerEventHandler {
     public static void onPlayerLogin(ServerPlayer player) {
         if (AtlasIdentityService.isPlayerAtlasEnabled()) {
             int atlasID = AtlasIdentityService.getOrCreatePlayerAtlasId(player);
-            new SyncPlayerAtlasIdS2CPacket(atlasID).send(player);
+            String atlasName = AtlasIdentityService.getAtlasName(player.level(), atlasID).orElse(null);
+            new SyncPlayerAtlasIdS2CPacket(atlasID, atlasName).send(player);
         }
 
         AntiqueAtlas.atlasScanService.syncActiveAtlasesToPlayer(player);

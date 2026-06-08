@@ -74,4 +74,21 @@ public interface MarkerAPI {
      * @param markerID
      */
     void deleteGlobalMarker(@NotNull Level world, int markerID);
+
+    /**
+     * Update an existing local marker in an atlas.
+     * <p>
+     * If calling this method on the client,
+     * the player must have access to the atlas, to prevent griefing.
+     * </p>
+     *
+     * @param world
+     * @param atlasID
+     * @param markerID
+     * @param marker updated marker type
+     * @param label updated text label
+     * @return returns the updated marker. null if failed or client
+     */
+    @Nullable
+    Marker updateMarker(@NotNull Level world, int atlasID, int markerID, ResourceLocation marker, Component label);
 }

@@ -49,9 +49,6 @@
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Marcador de muerte",
   "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Mostrar marcadores de muerte",
   "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Límite de marcadores de muerte",
-  "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Marcador de aldea",
-  "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Marcador de portal del Nether",
-  "text.autoconfig.antiqueatlas.option.itemNeeded": "Requerir el Atlas para su uso",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Activar atlas como objeto",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Activar atlas integrado del jugador",
 

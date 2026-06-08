@@ -186,6 +186,31 @@ public class MarkersData extends SavedData {
 		return marker;
 	}
 
+	public Marker updateMarker(int id, ResourceLocation type, Component label) {
+		Marker marker = getMarkerByID(id);
+		if (marker == null) {
+			return null;
+		}
+
+		Marker updated = new Marker(
+				marker.getId(),
+				type,
+				label,
+				marker.getWorld(),
+				marker.getX(),
+				marker.getZ(),
+				marker.isVisibleAhead()
+		).setGlobal(marker.isGlobal());
+
+		if (idMap.replace(id, marker, updated)) {
+			getMarkersDataInWorld(marker.getWorld()).replaceMarker(marker, updated);
+			setDirty();
+			return updated;
+		}
+
+		return null;
+	}
+
 	/** For internal use. Use the {@link MarkerAPI} to put markers! This method
 	 * creates a new marker from the given data, saves and returns it.
 	 * Server side only! */

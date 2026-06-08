@@ -60,8 +60,6 @@ public class AntiqueAtlasItems {
 
     public static void register() {
         if (AntiqueAtlas.CONFIG.enableItemAtlas) {
-//            RECIPES.register("atlas_clone", () -> RecipeAtlasCloning.SERIALIZER);
-//            RECIPES.register("atlas_combine", () -> RecipeAtlasCombining.SERIALIZER);
         }
     }
 }

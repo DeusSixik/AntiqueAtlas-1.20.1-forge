@@ -38,6 +38,12 @@ public class AtlasItem extends Item {
     }
 
     @Override
+    public void onCraftedBy(ItemStack stack, Level world, Player player) {
+        super.onCraftedBy(stack, world, player);
+        RecipeAtlasCombining.finalizeCombination(world, stack);
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level world, Player playerEntity, InteractionHand hand) {
         ItemStack stack = playerEntity.getItemInHand(hand);
 

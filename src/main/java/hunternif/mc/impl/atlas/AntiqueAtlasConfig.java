@@ -29,16 +29,6 @@ public class AntiqueAtlasConfig implements ConfigObject {
     @UnionConfig.Comment(comment = {"How many latest death markers are kept per atlas. Older death markers are removed automatically."})
     public int deathMarkerLimit = 5;
 
-    @UnionConfig.Entry(group = "Gameplay", name = "autoVillageMarkers", 
-    		translatable = "text.autoconfig.antiqueatlas.option.autoVillageMarkers", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Whether to add global markers for NPC villages."})
-    public boolean autoVillageMarkers = false;
-
-    @UnionConfig.Entry(group = "Gameplay", name = "autoNetherPortalMarkers", 
-    		translatable = "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers", side = ConfigSide.Shared)
-    @UnionConfig.Comment(comment = {"Whether to add global markers for Nether Portals."})
-    public boolean autoNetherPortalMarkers = true;
-
     @UnionConfig.Entry(group = "Gameplay", name = "enableItemAtlas",
     		translatable = "text.autoconfig.antiqueatlas.option.enableItemAtlas", side = ConfigSide.Shared)
     @UnionConfig.Comment(comment = {"If true, atlas exists as an item and can be crafted, carried and opened from inventory."})

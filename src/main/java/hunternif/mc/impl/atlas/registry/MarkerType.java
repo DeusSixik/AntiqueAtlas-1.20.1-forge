@@ -21,6 +21,7 @@ import hunternif.mc.impl.atlas.util.Log;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -46,6 +47,8 @@ public class MarkerType {
 
 	private double centerX = 0.5;
 	private double centerY = 0.5;
+	private Component title = null;
+	private Component defaultLabel = null;
 
 	private boolean isFromJson = false;
 
@@ -143,6 +146,20 @@ public class MarkerType {
 	public ITexture getTexture() {
 		if (icons.length == 0 || iconIndex < 0) return null;
 		return new Texture(getIcon(), iconSizes[iconIndex], iconSizes[iconIndex]);
+	}
+
+	public Component getTitle() {
+		if (title != null) {
+			return title.copy();
+		}
+		return buildFallbackTitle();
+	}
+
+	public Component getDefaultLabel() {
+		if (defaultLabel != null) {
+			return defaultLabel.copy();
+		}
+		return getTitle();
 	}
 
 	public ResourceLocation[] getAllIcons() {
@@ -290,8 +307,46 @@ public class MarkerType {
 		return this;
 	}
 
+	public MarkerType setTitle(Component value) {
+		this.title = value;
+		return this;
+	}
+
+	public MarkerType setDefaultLabel(Component value) {
+		this.defaultLabel = value;
+		return this;
+	}
+
 	public JSONData getJSONData() {
 		return data;
+	}
+
+	private Component buildFallbackTitle() {
+		ResourceLocation key = REGISTRY.getKey(this);
+		String raw = key != null ? key.getPath() : "marker";
+		int slashIndex = raw.lastIndexOf('/');
+		if (slashIndex >= 0 && slashIndex + 1 < raw.length()) {
+			raw = raw.substring(slashIndex + 1);
+		}
+
+		String[] parts = raw.replace('-', '_').split("_");
+		StringBuilder titleBuilder = new StringBuilder();
+		for (String part : parts) {
+			if (part.isEmpty()) {
+				continue;
+			}
+			if (titleBuilder.length() > 0) {
+				titleBuilder.append(' ');
+			}
+			titleBuilder.append(Character.toUpperCase(part.charAt(0)));
+			if (part.length() > 1) {
+				titleBuilder.append(part.substring(1));
+			}
+		}
+		if (titleBuilder.length() == 0) {
+			titleBuilder.append("Marker");
+		}
+		return Component.literal(titleBuilder.toString());
 	}
 
 	public static class JSONData {
@@ -305,6 +360,10 @@ public class MarkerType {
 			IS_TECH = "isTechnical",
 			CENTER_X = "centerX",
 			CENTER_Y = "centerY",
+			TITLE = "title",
+			TITLE_KEY = "title_key",
+			DEFAULT_LABEL = "default_label",
+			DEFAULT_LABEL_KEY = "default_label_key",
 
 			NONE = "NONE";
 
@@ -315,6 +374,7 @@ public class MarkerType {
 		Integer viewSize = null, clipMin = null, clipMax = null;
 		Boolean alwaysShow = null, isTile = null, isTechnical = null;
 		Double centerX = null, centerY = null;
+		Component title = null, defaultLabel = null;
 
 		JSONData(MarkerType type) {
 			this.type = type;
@@ -362,6 +422,14 @@ public class MarkerType {
 
 			if(centerY != null) {
 				object.addProperty(CENTER_Y, centerY);
+			}
+
+			if (title != null) {
+				object.addProperty(TITLE, title.getString());
+			}
+
+			if (defaultLabel != null) {
+				object.addProperty(DEFAULT_LABEL, defaultLabel.getString());
 			}
 		}
 
@@ -435,6 +503,26 @@ public class MarkerType {
 					centerY = object.get(CENTER_Y).getAsDouble();
 					workingOn = NONE;
 				}
+
+				if (object.has(TITLE_KEY) && object.get(TITLE_KEY).isJsonPrimitive()) {
+					workingOn = TITLE_KEY;
+					title = Component.translatable(object.get(TITLE_KEY).getAsString());
+					workingOn = NONE;
+				} else if (object.has(TITLE) && object.get(TITLE).isJsonPrimitive()) {
+					workingOn = TITLE;
+					title = Component.literal(object.get(TITLE).getAsString());
+					workingOn = NONE;
+				}
+
+				if (object.has(DEFAULT_LABEL_KEY) && object.get(DEFAULT_LABEL_KEY).isJsonPrimitive()) {
+					workingOn = DEFAULT_LABEL_KEY;
+					defaultLabel = Component.translatable(object.get(DEFAULT_LABEL_KEY).getAsString());
+					workingOn = NONE;
+				} else if (object.has(DEFAULT_LABEL) && object.get(DEFAULT_LABEL).isJsonPrimitive()) {
+					workingOn = DEFAULT_LABEL;
+					defaultLabel = Component.literal(object.get(DEFAULT_LABEL).getAsString());
+					workingOn = NONE;
+				}
 			} catch (ClassCastException e) {
 				Log.warn(e, "Loading marker $s from JSON: Parsing element %s: element was wrong type!", typeName, workingOn);
 			} catch (NumberFormatException e) {
@@ -462,6 +550,10 @@ public class MarkerType {
 				type.centerX = centerX;
 			if(centerY != null)
 				type.centerY = centerY;
+			if (title != null)
+				type.title = title;
+			if (defaultLabel != null)
+				type.defaultLabel = defaultLabel;
 		}
 
 	}

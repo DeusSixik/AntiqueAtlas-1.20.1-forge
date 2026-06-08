@@ -10,6 +10,7 @@
   "gui.antiqueatlas.hideMarkers": "Hide markers",
   "gui.antiqueatlas.showMarkers": "Show markers",
   "gui.antiqueatlas.openPlayerAtlas": "Open built-in atlas",
+  "gui.antiqueatlas.playerAtlasName": "Atlas: %s",
 
   "gui.antiqueatlas.marker.label": "Label:",
   "gui.antiqueatlas.marker.type": "Type:",
@@ -50,9 +51,6 @@
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Death marker",
   "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Death marker limit",
   "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Show death markers",
-  "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Village marker",
-  "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Nether portal marker",
-  "text.autoconfig.antiqueatlas.option.itemNeeded": "Atlas required for usage",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Enable atlas item",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Enable built-in player atlas",
   "text.autoconfig.antiqueatlas.option.enableBiomeInspect": "Enable biome inspect",

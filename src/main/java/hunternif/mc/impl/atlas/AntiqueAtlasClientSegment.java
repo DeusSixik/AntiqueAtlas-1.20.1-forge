@@ -13,6 +13,7 @@ import hunternif.mc.impl.atlas.client.KeyHandler;
 import hunternif.mc.impl.atlas.client.OverlayRenderer;
 import hunternif.mc.impl.atlas.client.gui.ExportProgressOverlay;
 import hunternif.mc.impl.atlas.client.gui.GuiAtlas;
+import hunternif.mc.impl.atlas.identity.AtlasReference;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,14 +33,27 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
     }
 
     public static void openAtlasGUI(ItemStack stack) {
-        openAtlasScreen(getAtlasGUI().prepareToOpen(stack));
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+
+        AtlasIdentityService.resolveAtlasReference(mc.player, stack)
+                .ifPresent(reference -> openAtlasScreen(getAtlasGUI().prepareToOpen(reference, stack)));
     }
 
     public static void openAtlasGUI() {
         if (!AtlasIdentityService.isPlayerAtlasEnabled()) {
             return;
         }
-        openAtlasScreen(getAtlasGUI().prepareToOpen());
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) {
+            return;
+        }
+
+        AtlasIdentityService.resolveAtlasReference(mc.player, ItemStack.EMPTY)
+                .ifPresent(reference -> openAtlasScreen(getAtlasGUI().prepareToOpen(reference)));
     }
 
     public static void openAtlasLayer() {
@@ -47,11 +61,15 @@ public class AntiqueAtlasClientSegment extends ClientSegment {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen != null) {
-            GuiAtlas gui = getAtlasGUI().prepareToOpen();
+        if (mc.screen == null || mc.player == null) {
+            return;
+        }
+
+        AtlasIdentityService.resolveAtlasReference(mc.player, ItemStack.EMPTY).ifPresent(reference -> {
+            GuiAtlas gui = getAtlasGUI().prepareToOpen(reference);
             gui.updateL18n();
             mc.pushGuiLayer(gui);
-        }
+        });
     }
 
     private static void openAtlasScreen(GuiAtlas gui) {

@@ -10,6 +10,7 @@ import hunternif.mc.api.client.AtlasClientAPI;
 import hunternif.mc.impl.atlas.client.gui.core.GuiComponent;
 import hunternif.mc.impl.atlas.client.gui.core.GuiScrollingContainer;
 import hunternif.mc.impl.atlas.client.gui.core.ToggleGroup;
+import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.registry.MarkerType;
 import hunternif.mc.impl.atlas.util.Log;
 import net.minecraft.client.Minecraft;
@@ -33,6 +34,7 @@ public class GuiMarkerFinalizer extends GuiComponent {
     private int atlasID;
     private int markerX;
     private int markerZ;
+    private Integer editingMarkerId;
 
     MarkerType selectedType = MarkerType.REGISTRY.get(MarkerType.REGISTRY.getDefaultKey());
 
@@ -47,6 +49,7 @@ public class GuiMarkerFinalizer extends GuiComponent {
     private EditBox textField;
     private GuiScrollingContainer scroller;
     private ToggleGroup<GuiMarkerInList> typeRadioGroup;
+    private String autoFilledLabel = "";
 
     private final List<IMarkerTypeSelectListener> markerListeners = new ArrayList<>();
 
@@ -58,7 +61,15 @@ public class GuiMarkerFinalizer extends GuiComponent {
         this.atlasID = atlasID;
         this.markerX = markerX;
         this.markerZ = markerZ;
+        this.editingMarkerId = null;
         setBlocksScreen(true);
+    }
+
+    void setMarkerData(Level world, int atlasID, Marker marker) {
+        setMarkerData(world, atlasID, marker.getX(), marker.getZ());
+        this.editingMarkerId = marker.getId();
+        this.selectedType = MarkerType.REGISTRY.get(marker.getType());
+        setMarkerName(marker.getLabel());
     }
 
     void addMarkerListener(IMarkerTypeSelectListener listener) {
@@ -78,8 +89,14 @@ public class GuiMarkerFinalizer extends GuiComponent {
         super.init();
 
         addRenderableWidget(btnDone = ScreenHelper.buttonBuilder(Component.translatable("gui.done"), (button) -> {
-            AtlasClientAPI.getMarkerAPI().putMarker(world, true, atlasID, MarkerType.REGISTRY.getKey(selectedType), Component.literal(textField.getValue()), markerX, markerZ);
-            Log.info("Put marker in Atlas #%d \"%s\" at (%d, %d)", atlasID, textField.getValue(), markerX, markerZ);
+            Component markerLabel = resolveMarkerLabel();
+            if (editingMarkerId != null) {
+                AtlasClientAPI.getMarkerAPI().updateMarker(world, atlasID, editingMarkerId, MarkerType.REGISTRY.getKey(selectedType), markerLabel);
+                Log.info("Updated marker #%d in Atlas #%d to \"%s\"", editingMarkerId, atlasID, markerLabel.getString());
+            } else {
+                AtlasClientAPI.getMarkerAPI().putMarker(world, true, atlasID, MarkerType.REGISTRY.getKey(selectedType), markerLabel, markerX, markerZ);
+                Log.info("Put marker in Atlas #%d \"%s\" at (%d, %d)", atlasID, markerLabel.getString(), markerX, markerZ);
+            }
 
             LocalPlayer player = Minecraft.getInstance().player;
             world.playSound(player, player.blockPosition(),
@@ -112,7 +129,9 @@ public class GuiMarkerFinalizer extends GuiComponent {
 
         typeRadioGroup = new ToggleGroup<>();
         typeRadioGroup.addListener(button -> {
+            String previousAutoLabel = autoFilledLabel;
             selectedType = button.getMarkerType();
+            syncAutoLabel(previousAutoLabel);
             for (IMarkerTypeSelectListener listener : markerListeners) {
                 listener.onSelectMarkerType(button.getMarkerType());
             }
@@ -129,10 +148,13 @@ public class GuiMarkerFinalizer extends GuiComponent {
             scroller.addContent(markerGui).setRelativeX(contentX);
             contentX += GuiMarkerInList.FRAME_SIZE + TYPE_SPACING;
         }
+
+        syncAutoLabel("");
     }
 
     public void setMarkerName(Component name) {
         textField.setValue(name.getString());
+        autoFilledLabel = "";
     }
 
     @Override
@@ -171,6 +193,28 @@ public class GuiMarkerFinalizer extends GuiComponent {
                 scroller.getGuiY() + scroller.getHeight() + TYPE_BG_FRAME,
                 0x88101010, 0x99101010);
         super.render(matrices, mouseX, mouseY, partialTick);
+    }
+
+    private Component resolveMarkerLabel() {
+        String value = textField.getValue().trim();
+        if (value.isEmpty()) {
+            Component defaultLabel = selectedType.getDefaultLabel();
+            value = defaultLabel.getString().trim();
+            textField.setValue(value);
+            autoFilledLabel = value;
+        }
+        return Component.literal(value);
+    }
+
+    private void syncAutoLabel(String previousAutoLabel) {
+        String currentValue = textField.getValue().trim();
+        boolean shouldReplace = currentValue.isEmpty()
+                || (!previousAutoLabel.isEmpty() && currentValue.equals(previousAutoLabel));
+        String nextAutoLabel = selectedType.getDefaultLabel().getString().trim();
+        autoFilledLabel = nextAutoLabel;
+        if (shouldReplace) {
+            textField.setValue(nextAutoLabel);
+        }
     }
 
     interface IMarkerTypeSelectListener {

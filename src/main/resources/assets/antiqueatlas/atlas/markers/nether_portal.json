@@ -2,5 +2,7 @@
 	"version": 1,
 	"textures": [
 		"antiqueatlas:textures/gui/markers/nether_portal.png"
-	]
+	],
+	"title_key": "gui.antiqueatlas.marker.netherPortal",
+	"default_label_key": "gui.antiqueatlas.marker.netherPortal"
 }

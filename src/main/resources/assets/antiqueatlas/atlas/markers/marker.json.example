@@ -15,5 +15,9 @@
 	"isTile": "[Default: false] True if the marker should scale with the map",
 	"isTechnical": "[Default: false] True if user should not be able to place the marker on the map",
 	"centerX": "[Default: 0.5] The point in the image that should be at the location of the marker (0-1)",
-	"centerY": "[Default: 0.5] The point in the image that should be at the location of the marker (0-1)"
+	"centerY": "[Default: 0.5] The point in the image that should be at the location of the marker (0-1)",
+	"title": "[Optional] Literal title shown in the marker picker tooltip",
+	"title_key": "[Optional] Translation key shown in the marker picker tooltip",
+	"default_label": "[Optional] Literal text auto-filled into the marker name field",
+	"default_label_key": "[Optional] Translation key auto-filled into the marker name field"
 }

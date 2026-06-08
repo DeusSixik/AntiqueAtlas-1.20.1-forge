@@ -9,6 +9,8 @@
   "gui.antiqueatlas.exportImage": "Сохранить изображение",
   "gui.antiqueatlas.hideMarkers": "Скрыть метки",
   "gui.antiqueatlas.showMarkers": "Показать метки",
+  "gui.antiqueatlas.openPlayerAtlas": "Открыть встроенный атлас",
+  "gui.antiqueatlas.playerAtlasName": "Атлас: %s",
 
   "gui.antiqueatlas.marker.label": "Метка:",
   "gui.antiqueatlas.marker.type": "Тип:",
@@ -49,9 +51,6 @@
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Метка смерти",
   "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Показывать метки смерти",
   "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Лимит меток смерти",
-  "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Метка деревни",
-  "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Метка портала в Нижний Мир",
-  "text.autoconfig.antiqueatlas.option.itemNeeded": "Для использования необходим атлас",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Включить атлас-предмет",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Включить встроенный атлас игрока",
 

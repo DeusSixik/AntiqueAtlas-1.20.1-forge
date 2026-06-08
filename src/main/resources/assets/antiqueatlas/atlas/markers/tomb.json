@@ -2,5 +2,7 @@
 	"version": 1,
 	"textures": [
 		"antiqueatlas:textures/gui/markers/tomb.png"
-	]
+	],
+	"title": "Tomb",
+	"default_label": "Tomb"
 }

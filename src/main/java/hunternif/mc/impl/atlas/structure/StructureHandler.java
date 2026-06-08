@@ -9,8 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang3.tuple.Triple;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -19,8 +17,6 @@ import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.util.MathUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
@@ -28,7 +24,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -39,7 +34,6 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 public class StructureHandler {
     private static final HashMultimap<ResourceLocation, Tuple<ResourceLocation, Setter>> STRUCTURE_PIECE_TO_TILE_MAP = HashMultimap.create();
     private static final Multimap<ResourceLocation, Tuple<ResourceLocation, Setter>> JIGSAW_TO_TILE_MAP = HashMultimap.create();
-    private static final Map<ResourceLocation, Tuple<ResourceLocation, Component>> STRUCTURE_PIECE_TO_MARKER_MAP = new HashMap<>();
     private static final Map<ResourceLocation, Integer> STRUCTURE_PIECE_TILE_PRIORITY = new HashMap<>();
     private static final Set<ResourceLocation> LOGGED_MISSING_STRUCTURE_PIECES = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private static final Set<ResourceLocation> LOGGED_MISSING_JIGSAW_PATTERNS = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -121,8 +115,6 @@ public class StructureHandler {
         return Collections.emptyList();
     }
 
-    private static final Set<Triple<Integer, Integer, ResourceLocation>> VISITED_STRUCTURES = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
     public static void clearStructurePieceTileRegistrations() {
         STRUCTURE_PIECE_TO_TILE_MAP.clear();
         STRUCTURE_PIECE_TILE_PRIORITY.clear();
@@ -159,10 +151,6 @@ public class StructureHandler {
 
     public static void registerJigsawTile(ResourceLocation jigsawPattern, int priority, ResourceLocation tileID) {
         registerJigsawTile(jigsawPattern, priority, tileID, ALWAYS);
-    }
-
-    public static void registerMarker(ResourceKey<Structure> structureFeature, ResourceLocation markerType, Component name) {
-        STRUCTURE_PIECE_TO_MARKER_MAP.put(structureFeature.location(), new Tuple<>(markerType, name));
     }
 
     public static Setter setterByName(String setter, ResourceLocation resourceId) {
@@ -301,25 +289,7 @@ public class StructureHandler {
     }
 
     public static void resolve(StructureStart structureStart, ServerLevel world) {
-        ResourceLocation structureId = world.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(structureStart.getStructure());
-        if (STRUCTURE_PIECE_TO_MARKER_MAP.containsKey(structureId)) {
-            Triple<Integer, Integer, ResourceLocation> key = Triple.of(
-                    structureStart.getBoundingBox().getCenter().getX(),
-                    structureStart.getBoundingBox().getCenter().getY(),
-                    structureId);
-
-            if (VISITED_STRUCTURES.contains(key)) return;
-            VISITED_STRUCTURES.add(key);
-
-            AtlasAPI.getMarkerAPI().putGlobalMarker(
-                    world,
-                    false,
-                    STRUCTURE_PIECE_TO_MARKER_MAP.get(structureId).getA(),
-                    STRUCTURE_PIECE_TO_MARKER_MAP.get(structureId).getB(),
-                    structureStart.getBoundingBox().getCenter().getX(),
-                    structureStart.getBoundingBox().getCenter().getZ()
-            );
-        }
+        // Structures are represented as tiles now; automatic non-death markers are intentionally disabled.
     }
 
     interface Setter {

@@ -48,9 +48,6 @@
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Todesmarkierungen",
   "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Todesmarkierungen anzeigen",
   "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Limit für Todesmarkierungen",
-  "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Markierungen für Dörfer",
-  "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Markierungen für Nether Portale",
-  "text.autoconfig.antiqueatlas.option.itemNeeded": "Atlas wird benötigt",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Atlas-Gegenstand aktivieren",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Integrierten Spieleratlas aktivieren",
 

@@ -4,6 +4,8 @@ import hunternif.mc.impl.atlas.client.Textures;
 import hunternif.mc.impl.atlas.client.gui.core.GuiToggleButton;
 import hunternif.mc.impl.atlas.client.texture.ITexture;
 import hunternif.mc.impl.atlas.registry.MarkerType;
+import java.util.Collections;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 
@@ -29,6 +31,10 @@ public class GuiMarkerInList extends GuiToggleButton {
         ITexture texture = markerType.getTexture();
         if (texture != null) {
             texture.draw(matrices, getGuiX() + 1, getGuiY() + 1);
+        }
+
+        if (isMouseOver) {
+            drawTooltip(Collections.singletonList(markerType.getTitle()), Minecraft.getInstance().font);
         }
 
         super.render(matrices, mouseX, mouseY, partialTick);

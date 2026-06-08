@@ -21,7 +21,6 @@ import hunternif.mc.impl.atlas.core.PlayerEventHandler;
 import hunternif.mc.impl.atlas.core.TileDataHandler;
 import hunternif.mc.impl.atlas.core.scaning.TileDetectorBase;
 import hunternif.mc.impl.atlas.core.scaning.WorldScanner;
-//import hunternif.mc.impl.atlas.event.RecipeCraftedHandler;
 import hunternif.mc.impl.atlas.identity.AtlasDirectoryData;
 import hunternif.mc.impl.atlas.item.AntiqueAtlasItems;
 import hunternif.mc.impl.atlas.marker.GlobalMarkersDataHandler;
@@ -30,6 +29,7 @@ import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutBrowsingPositionC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutTileC2SPacket;
+import hunternif.mc.impl.atlas.network.packet.c2s.play.UpdateMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteGlobalTileS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DimensionUpdateS2CPacket;
@@ -39,19 +39,18 @@ import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutTileS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.SyncPlayerAtlasIdS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.TileGroupsS2CPacket;
+import hunternif.mc.impl.atlas.network.packet.s2c.play.UpdateMarkerS2CPacket;
 import hunternif.mc.impl.atlas.lod.LodTileAggregationService;
 import hunternif.mc.impl.atlas.rules.TileSelectionConfig;
 import hunternif.mc.impl.atlas.rules.TileSelectionRules;
 import hunternif.mc.impl.atlas.service.ActiveAtlasResolver;
 import hunternif.mc.impl.atlas.service.AtlasScanService;
 import hunternif.mc.impl.atlas.service.DeathMarkerService;
-import hunternif.mc.impl.atlas.structure.EndCity;
 import hunternif.mc.impl.atlas.structure.JigsawConfig;
 import hunternif.mc.impl.atlas.structure.NetherFortress;
 import hunternif.mc.impl.atlas.structure.Overworld;
 import hunternif.mc.impl.atlas.structure.StructurePieceConfig;
 import hunternif.mc.impl.atlas.structure.StructureHandler;
-import hunternif.mc.impl.atlas.structure.Village;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -126,14 +125,8 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 
 //        LifecycleEvent.SERVER_LEVEL_LOAD.register(globalMarkersData::onWorldLoad);
 //        LifecycleEvent.SERVER_LEVEL_LOAD.register(globalTileData::onWorldLoad);
-
-        //RecipeCraftedCallback.EVENT.register(new RecipeCraftedHandler());
-
         //StructurePieceAddedCallback.EVENT.register(StructureHandler::resolve);
         //StructureAddedCallback.EVENT.register(StructureHandler::resolve);
-
-        EndCity.registerMarkers();
-        Village.registerMarkers();
     }
     
     @Override
@@ -204,10 +197,12 @@ public class AntiqueAtlas extends MinecraftMod implements PacketHolder {
 		collector.registerClientboundPacket(PutTileS2CPacket.ID, PutTileS2CPacket.class, PutTileS2CPacket::new);
 		collector.registerClientboundPacket(SyncPlayerAtlasIdS2CPacket.ID, SyncPlayerAtlasIdS2CPacket.class, SyncPlayerAtlasIdS2CPacket::new);
 		collector.registerClientboundPacket(TileGroupsS2CPacket.ID, TileGroupsS2CPacket.class, TileGroupsS2CPacket::new);
+		collector.registerClientboundPacket(UpdateMarkerS2CPacket.ID, UpdateMarkerS2CPacket.class, UpdateMarkerS2CPacket::new);
 		
 		collector.registerServerboundPacket(PutMarkerC2SPacket.ID, PutMarkerC2SPacket.class, PutMarkerC2SPacket::new);
 		collector.registerServerboundPacket(PutBrowsingPositionC2SPacket.ID, PutBrowsingPositionC2SPacket.class, PutBrowsingPositionC2SPacket::new);
 		collector.registerServerboundPacket(DeleteMarkerC2SPacket.ID, DeleteMarkerC2SPacket.class, DeleteMarkerC2SPacket::new);
 		collector.registerServerboundPacket(PutTileC2SPacket.ID, PutTileC2SPacket.class, PutTileC2SPacket::new);
+		collector.registerServerboundPacket(UpdateMarkerC2SPacket.ID, UpdateMarkerC2SPacket.class, UpdateMarkerC2SPacket::new);
 	}
 }

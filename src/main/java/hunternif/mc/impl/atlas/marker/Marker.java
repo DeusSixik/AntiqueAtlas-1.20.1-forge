@@ -138,5 +138,25 @@ public class Marker {
 			this.z = marker.z;
 			this.visibleAhead = marker.visibleAhead;
 		}
+
+		public int getId() {
+			return id;
+		}
+
+		public Component getLabel() {
+			return label;
+		}
+
+		public int getX() {
+			return x;
+		}
+
+		public int getZ() {
+			return z;
+		}
+
+		public boolean isVisibleAhead() {
+			return visibleAhead;
+		}
 	}
 }

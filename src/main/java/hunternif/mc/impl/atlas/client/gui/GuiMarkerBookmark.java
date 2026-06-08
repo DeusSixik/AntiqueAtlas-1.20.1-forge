@@ -24,6 +24,7 @@ public class GuiMarkerBookmark extends GuiComponentButton {
     private final int colorIndex;
     private ITexture iconTexture;
     private Marker marker;
+    private Runnable secondaryClickListener;
 
     GuiMarkerBookmark(Marker marker) {
         this.colorIndex = 3;
@@ -41,6 +42,23 @@ public class GuiMarkerBookmark extends GuiComponentButton {
 
     public Component getTitle() {
         return marker.getLabel();
+    }
+
+    public Marker getMarker() {
+        return marker;
+    }
+
+    public void setSecondaryClickListener(Runnable listener) {
+        this.secondaryClickListener = listener;
+    }
+
+    @Override
+    public boolean mouseClicked(double x, double y, int mouseButton) {
+        if (mouseButton == 1 && isEnabled() && isMouseOver && secondaryClickListener != null) {
+            secondaryClickListener.run();
+            return true;
+        }
+        return super.mouseClicked(x, y, mouseButton);
     }
 
 

@@ -16,6 +16,8 @@ import hunternif.mc.impl.atlas.core.scaning.TileHeightType;
 import hunternif.mc.impl.atlas.event.MarkerClickedCallback;
 import hunternif.mc.impl.atlas.event.MarkerHoveredCallback;
 import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
+import hunternif.mc.impl.atlas.identity.AtlasReference;
+import hunternif.mc.impl.atlas.identity.AtlasReferenceType;
 import hunternif.mc.impl.atlas.marker.DimensionMarkersData;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
@@ -37,6 +39,7 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import net.minecraft.Util;
@@ -289,6 +292,7 @@ public class GuiAtlas extends GuiComponent {
     // Misc stuff ==============================================================
 
     private Player player;
+    private AtlasReference atlasReference;
     private ItemStack stack = ItemStack.EMPTY;
     private WorldData biomeData;
 
@@ -448,9 +452,15 @@ public class GuiAtlas extends GuiComponent {
         state.switchTo(NORMAL);
     }
 
-    public GuiAtlas prepareToOpen(ItemStack stack) {
+    public GuiAtlas prepareToOpen(AtlasReference atlasReference, ItemStack stack) {
+        this.atlasReference = atlasReference;
         this.stack = stack;
+        return prepareToOpenInternal();
+    }
 
+    public GuiAtlas prepareToOpen(AtlasReference atlasReference) {
+        this.atlasReference = atlasReference;
+        this.stack = ItemStack.EMPTY;
         return prepareToOpenInternal();
     }
 
@@ -480,9 +490,21 @@ public class GuiAtlas extends GuiComponent {
         state.switchTo(NORMAL);
     }
 
-    public GuiAtlas prepareToOpen() {
-        this.stack = ItemStack.EMPTY;
-        return prepareToOpenInternal();
+    public void openMarkerFinalizer(Marker marker) {
+        markerFinalizer.setMarkerData(player.getCommandSenderWorld(), getAtlasID(), marker);
+        addChild(markerFinalizer);
+
+        blinkingIcon.setTexture(markerFinalizer.selectedType.getTexture(),
+                MARKER_SIZE, MARKER_SIZE);
+        addChildBehind(markerFinalizer, blinkingIcon)
+                .setRelativeCoords(worldXToScreenX(marker.getX()) - getGuiX() - MARKER_SIZE / 2,
+                        worldZToScreenY(marker.getZ()) - getGuiY() - MARKER_SIZE / 2);
+
+        setInterceptKeyboard(true);
+        KeyMapping.releaseAll();
+
+        selectedButton = null;
+        state.switchTo(NORMAL);
     }
 
     private GuiAtlas prepareToOpenInternal() {
@@ -534,6 +556,7 @@ public class GuiAtlas extends GuiComponent {
                 continue;
             }
             GuiMarkerBookmark bookmark = new GuiMarkerBookmark(marker);
+            bookmark.setSecondaryClickListener(() -> openMarkerFinalizer(bookmark.getMarker()));
 
             bookmark.addListener(button -> {
                 if (state.is(NORMAL)) {
@@ -976,6 +999,9 @@ public class GuiAtlas extends GuiComponent {
 //        RenderSystem.enableAlphaTest();
 //        RenderSystem.alphaFunc(GL11.GL_GREATER, 0); // So light detail on tiles is visible
         Textures.BOOK.draw(matrices, getGuiX(), getGuiY());
+        if (hasAccessibleAtlas()) {
+            drawCentered(matrices, getAtlasTitle(), getGuiY() + 6, 0x5b4631, false);
+        }
 
         if (!hasAccessibleAtlas() || biomeData == null)
             return;
@@ -1520,7 +1546,29 @@ public class GuiAtlas extends GuiComponent {
     }
 
     private OptionalInt resolveAtlasID() {
-        return AtlasIdentityService.resolveAtlasId(player, stack);
+        return atlasReference == null ? OptionalInt.empty() : OptionalInt.of(atlasReference.atlasId());
+    }
+
+    private Component getAtlasTitle() {
+        int atlasId = getAtlasID();
+        if (!stack.isEmpty() && stack.hasCustomHoverName()) {
+            return stack.getHoverName().copy();
+        }
+
+        if (player != null) {
+            Optional<String> atlasName = AtlasIdentityService.getAtlasName(player.level(), atlasId);
+            if (atlasName.isPresent()) {
+                return Component.literal(atlasName.get());
+            }
+        }
+
+        if (atlasReference != null && atlasReference.type() == AtlasReferenceType.PLAYER) {
+            return Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
+        }
+
+        return AntiqueAtlas.CONFIG.enableItemAtlas && !stack.isEmpty()
+                ? stack.getHoverName().copy()
+                : Component.translatable("item.antiqueatlas.antique_atlas", atlasId);
     }
 
     private static final class SelectedBiomeStorage implements ITileStorage {

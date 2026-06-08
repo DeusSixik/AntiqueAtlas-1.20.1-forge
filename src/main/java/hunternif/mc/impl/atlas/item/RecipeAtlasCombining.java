@@ -1,10 +1,13 @@
 package hunternif.mc.impl.atlas.item;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import hunternif.mc.impl.atlas.AntiqueAtlas;
 import hunternif.mc.impl.atlas.core.AtlasData;
+import hunternif.mc.impl.atlas.identity.AtlasIdentityService;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.marker.MarkersData;
 import net.minecraft.core.RegistryAccess;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.Level;
  * @author Hunternif
  */
 public class RecipeAtlasCombining extends CustomRecipe {
+    private static final String TAG_PENDING_ATLAS_IDS = "aaPendingCombineAtlasIds";
 
     public RecipeAtlasCombining(ResourceLocation pId, CraftingBookCategory craftingBookCategory) {
     	super(pId, craftingBookCategory);
@@ -46,9 +50,10 @@ public class RecipeAtlasCombining extends CustomRecipe {
         for (int i = 0; i < inv.getContainerSize(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
-                if (stack.getItem() == AntiqueAtlasItems.Items.ATLAS) {
-                    atlasesFound++;
+                if (stack.getItem() != AntiqueAtlasItems.Items.ATLAS) {
+                    return false;
                 }
+                atlasesFound++;
             }
         }
         return atlasesFound > 1;
@@ -57,20 +62,28 @@ public class RecipeAtlasCombining extends CustomRecipe {
     @Override
     public ItemStack assemble(CraftingContainer inv, RegistryAccess provider) {
         ItemStack firstAtlas = ItemStack.EMPTY;
-        List<Integer> atlasIds = new ArrayList<>(9);
+        Set<Integer> atlasIds = new LinkedHashSet<>(9);
+        int atlasCount = 0;
         for (int i = 0; i < inv.getContainerSize(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
-                if (stack.getItem() instanceof AtlasItem) {
-                    if (firstAtlas.isEmpty()) {
-                        firstAtlas = stack;
-                    } else {
-                        atlasIds.add(AtlasItem.getAtlasID(stack));
-                    }
+                if (!(stack.getItem() instanceof AtlasItem)) {
+                    return ItemStack.EMPTY;
                 }
+                if (firstAtlas.isEmpty()) {
+                    firstAtlas = stack;
+                }
+                atlasCount++;
+                atlasIds.add(AtlasItem.getAtlasID(stack));
             }
         }
-        return atlasIds.size() < 1 ? ItemStack.EMPTY : firstAtlas.copy();
+        if (firstAtlas.isEmpty() || atlasCount < 2 || atlasIds.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack result = firstAtlas.copy();
+        setPendingAtlasIds(result, atlasIds);
+        return result;
     }
 
     @Override
@@ -103,25 +116,37 @@ public class RecipeAtlasCombining extends CustomRecipe {
         return RecipeType.CRAFTING;
     }
 
-    public ItemStack onCrafted(Level world, Container inventory, ItemStack result) {
-        if (world.isClientSide) return result;
+    public static boolean hasPendingCombination(ItemStack stack) {
+        return stack.getTag() != null && stack.getTag().contains(TAG_PENDING_ATLAS_IDS);
+    }
+
+    public static void finalizeCombination(Level world, ItemStack result) {
+        if (world.isClientSide || result.isEmpty() || !hasPendingCombination(result)) {
+            return;
+        }
+
+        List<Integer> atlasIds = getPendingAtlasIds(result);
+        clearPendingAtlasIds(result);
+        if (atlasIds.isEmpty()) {
+            return;
+        }
+
         // Until the first update, on the client the returned atlas ID is the same as the first Atlas on the crafting grid.
         int atlasID = AntiqueAtlas.getAtlasDirectoryData(world).getNextAtlasId();
+        int namingSourceAtlasId = atlasIds.get(0);
 
         AtlasData destBiomes = AntiqueAtlas.tileData.getData(atlasID, world);
         destBiomes.setDirty();
         MarkersData destMarkers = AntiqueAtlas.markersData.getMarkersData(atlasID, world);
         destMarkers.setDirty();
-        for (int i = 0; i < inventory.getContainerSize(); ++i) {
-            ItemStack stack = inventory.getItem(i);
-            if (stack.isEmpty()) continue;
-            AtlasData srcBiomes = AntiqueAtlas.tileData.getData(stack, world);
+        for (int sourceAtlasId : atlasIds) {
+            AtlasData srcBiomes = AntiqueAtlas.tileData.getData(sourceAtlasId, world);
             if (destBiomes != null && srcBiomes != null && destBiomes != srcBiomes) {
                 for (ResourceKey<Level> worldRegistryKey : srcBiomes.getVisitedWorlds()) {
                     destBiomes.getWorldData(worldRegistryKey).addData(srcBiomes.getWorldData(worldRegistryKey));
                 }
             }
-            MarkersData srcMarkers = AntiqueAtlas.markersData.getMarkersData(stack, world);
+            MarkersData srcMarkers = AntiqueAtlas.markersData.getMarkersData(sourceAtlasId, world);
             if (destMarkers != null && srcMarkers != null && destMarkers != srcMarkers) {
                 for (ResourceKey<Level> worldRegistryKey : srcMarkers.getVisitedDimensions()) {
                     for (Marker marker : srcMarkers.getMarkersDataInWorld(worldRegistryKey).getAllMarkers()) {
@@ -134,7 +159,32 @@ public class RecipeAtlasCombining extends CustomRecipe {
 
         // Set atlas ID last, because otherwise we wouldn't be able copy the
         // data from the atlas which was used as a placeholder for the result.
+        AtlasIdentityService.syncAtlasNameFromStack(result, world);
+        AtlasIdentityService.copyAtlasName(world, namingSourceAtlasId, atlasID);
         AntiqueAtlasItems.Components.ATLAS_ID_DATA.setData(result, new AntiqueAtlasItems.AtlasId(atlasID));
-        return result;
+        AtlasIdentityService.initializeAtlasName(result, world, atlasID);
+    }
+
+    private static void setPendingAtlasIds(ItemStack stack, Set<Integer> atlasIds) {
+        int[] serialized = atlasIds.stream().mapToInt(Integer::intValue).toArray();
+        stack.getOrCreateTag().putIntArray(TAG_PENDING_ATLAS_IDS, serialized);
+    }
+
+    private static List<Integer> getPendingAtlasIds(ItemStack stack) {
+        int[] serialized = stack.getTag() == null ? new int[0] : stack.getTag().getIntArray(TAG_PENDING_ATLAS_IDS);
+        List<Integer> atlasIds = new ArrayList<>(serialized.length);
+        for (int atlasId : serialized) {
+            if (!atlasIds.contains(atlasId)) {
+                atlasIds.add(atlasId);
+            }
+        }
+        return atlasIds;
+    }
+
+    private static void clearPendingAtlasIds(ItemStack stack) {
+        if (stack.getTag() == null) {
+            return;
+        }
+        stack.removeTagKey(TAG_PENDING_ATLAS_IDS);
     }
 }

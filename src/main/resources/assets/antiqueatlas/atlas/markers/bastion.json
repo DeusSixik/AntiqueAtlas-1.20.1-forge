@@ -3,6 +3,8 @@
 	"textures": [
 		"antiqueatlas:textures/gui/markers/tower.png"
 	],
+	"title": "Bastion",
+	"default_label": "Bastion",
 	"isTile": true,
 	"isTechnical": true,
 	"centerX": 0.5,

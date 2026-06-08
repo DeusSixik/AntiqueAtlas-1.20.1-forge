@@ -49,9 +49,6 @@
   "text.autoconfig.antiqueatlas.option.autoDeathMarker": "Мітка смерті",
   "text.autoconfig.antiqueatlas.option.showDeathMarkers": "Показувати мітки смерті",
   "text.autoconfig.antiqueatlas.option.deathMarkerLimit": "Ліміт міток смерті",
-  "text.autoconfig.antiqueatlas.option.autoVillageMarkers": "Мітка села",
-  "text.autoconfig.antiqueatlas.option.autoNetherPortalMarkers": "Мітка порталу в Незер",
-  "text.autoconfig.antiqueatlas.option.itemNeeded": "Для використання необхідний атлас",
   "text.autoconfig.antiqueatlas.option.enableItemAtlas": "Увімкнути атлас-предмет",
   "text.autoconfig.antiqueatlas.option.enablePlayerAtlas": "Увімкнути вбудований атлас гравця",
 

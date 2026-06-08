@@ -5,6 +5,7 @@ import hunternif.mc.api.MarkerAPI;
 import hunternif.mc.impl.atlas.marker.Marker;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.PutMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
+import hunternif.mc.impl.atlas.network.packet.c2s.play.UpdateMarkerC2SPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -36,5 +37,12 @@ public class MarkerApiImplClient implements MarkerAPI {
     @Override
     public void deleteGlobalMarker(@NotNull Level world, int markerID) {
         AntiqueAtlas.LOG.warn("Client tried to delete a global marker");
+    }
+
+    @Nullable
+    @Override
+    public Marker updateMarker(@NotNull Level world, int atlasID, int markerID, ResourceLocation marker, Component label) {
+        new UpdateMarkerC2SPacket(atlasID, markerID, marker, label).send();
+        return null;
     }
 }

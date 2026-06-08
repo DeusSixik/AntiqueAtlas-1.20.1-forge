@@ -71,6 +71,25 @@ public class DimensionMarkersData {
 				marker.getChunkZ() / MarkersData.CHUNK_STEP).remove(marker);
 	}
 
+	public boolean replaceMarker(Marker oldMarker, Marker newMarker) {
+		List<Marker> list = getMarkersAtChunk(
+				oldMarker.getChunkX() / MarkersData.CHUNK_STEP,
+				oldMarker.getChunkZ() / MarkersData.CHUNK_STEP);
+		if (list == null) {
+			return false;
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).equals(oldMarker)) {
+				list.set(i, newMarker);
+				parent.setDirty();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/** The returned view is immutable, i.e. remove() won't work. */
 	public Collection<Marker> getAllMarkers() {
 		return values;

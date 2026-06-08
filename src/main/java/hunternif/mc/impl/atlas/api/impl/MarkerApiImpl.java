@@ -7,6 +7,7 @@ import hunternif.mc.impl.atlas.marker.MarkersData;
 import hunternif.mc.impl.atlas.network.packet.c2s.play.DeleteMarkerC2SPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.DeleteMarkerS2CPacket;
 import hunternif.mc.impl.atlas.network.packet.s2c.play.PutMarkersS2CPacket;
+import hunternif.mc.impl.atlas.network.packet.s2c.play.UpdateMarkerS2CPacket;
 import hunternif.mc.impl.atlas.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,21 @@ public class MarkerApiImpl implements MarkerAPI {
     @Override
     public void deleteGlobalMarker(@NotNull Level world, int markerID) {
         doDeleteMarker(world, GLOBAL, markerID);
+    }
+
+    @Nullable
+    @Override
+    public Marker updateMarker(@NotNull Level world, int atlasID, int markerId, ResourceLocation marker, Component label) {
+        if (world.isClientSide || world.getServer() == null) {
+            return null;
+        }
+
+        MarkersData data = AntiqueAtlas.markersData.getMarkersData(atlasID, world);
+        Marker updated = data.updateMarker(markerId, marker, label);
+        if (updated != null) {
+            new UpdateMarkerS2CPacket(atlasID, updated).send((ServerLevel) world);
+        }
+        return updated;
     }
 
     private void doDeleteMarker(Level world, int atlasID, int markerID) {

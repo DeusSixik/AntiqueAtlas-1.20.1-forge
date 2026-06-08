@@ -1,5 +1,7 @@
 package hunternif.mc.impl.atlas.identity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -14,6 +16,7 @@ import net.minecraft.world.level.Level;
 public final class AtlasIdentityService {
     private static final String TAG_SYNCED_NAME = "aaAtlasSyncedName";
     private static Integer clientPlayerAtlasId;
+    private static final Map<Integer, String> clientAtlasNames = new HashMap<>();
 
     private AtlasIdentityService() {
     }
@@ -41,12 +44,31 @@ public final class AtlasIdentityService {
         return stack != null && !stack.isEmpty() && stack.getItem() instanceof AtlasItem;
     }
 
-    public static void setClientPlayerAtlasId(int atlasId) {
+    public static void setClientPlayerAtlasState(int atlasId, String atlasName) {
         clientPlayerAtlasId = atlasId;
+        setClientAtlasName(atlasId, atlasName);
+    }
+
+    public static void setClientPlayerAtlasId(int atlasId) {
+        setClientPlayerAtlasState(atlasId, null);
+    }
+
+    public static void setClientAtlasName(int atlasId, String atlasName) {
+        String normalizedName = normalizeName(atlasName);
+        if (normalizedName == null) {
+            clientAtlasNames.remove(atlasId);
+            return;
+        }
+        clientAtlasNames.put(atlasId, normalizedName);
+    }
+
+    public static Optional<String> getClientAtlasName(int atlasId) {
+        return Optional.ofNullable(clientAtlasNames.get(atlasId));
     }
 
     public static void clearClientState() {
         clientPlayerAtlasId = null;
+        clientAtlasNames.clear();
     }
 
     public static OptionalInt resolveAtlasId(Player player, ItemStack stack) {
@@ -62,11 +84,24 @@ public final class AtlasIdentityService {
         return OptionalInt.empty();
     }
 
-    public static Optional<String> getAtlasName(Level world, int atlasId) {
-        if (!(world instanceof ServerLevel serverLevel)) {
-            return Optional.empty();
+    public static Optional<AtlasReference> resolveAtlasReference(Player player, ItemStack stack) {
+        if (isAtlasItem(stack)) {
+            return Optional.of(AtlasReference.item(AtlasItem.getAtlasID(stack)));
         }
-        return AntiqueAtlas.getAtlasDirectoryData(serverLevel).getAtlasName(atlasId);
+        if (player != null && isPlayerAtlasEnabled()) {
+            if (player.level().isClientSide()) {
+                return clientPlayerAtlasId == null ? Optional.empty() : Optional.of(AtlasReference.player(clientPlayerAtlasId));
+            }
+            return Optional.of(AtlasReference.player(getOrCreatePlayerAtlasId(player)));
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<String> getAtlasName(Level world, int atlasId) {
+        if (world.isClientSide()) {
+            return getClientAtlasName(atlasId);
+        }
+        return AntiqueAtlas.getAtlasDirectoryData((ServerLevel) world).getAtlasName(atlasId);
     }
 
     public static void setAtlasName(Level world, int atlasId, String name) {
@@ -74,6 +109,15 @@ public final class AtlasIdentityService {
             return;
         }
         AntiqueAtlas.getAtlasDirectoryData(serverLevel).setAtlasName(atlasId, name);
+    }
+
+    public static void copyAtlasName(Level world, int sourceAtlasId, int targetAtlasId) {
+        if (!(world instanceof ServerLevel)) {
+            return;
+        }
+
+        Optional<String> storedName = getAtlasName(world, sourceAtlasId);
+        setAtlasName(world, targetAtlasId, storedName.orElse(null));
     }
 
     public static Component getDefaultAtlasName(int atlasId) {
@@ -132,6 +176,7 @@ public final class AtlasIdentityService {
         if (storedName.isPresent()) {
             applyAtlasNameToStack(stack, storedName.get());
         } else {
+            stack.resetHoverName();
             clearSyncedName(stack);
         }
     }
