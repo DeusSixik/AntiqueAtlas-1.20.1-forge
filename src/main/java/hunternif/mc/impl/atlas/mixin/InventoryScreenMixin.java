@@ -45,7 +45,7 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
     }
 
     private static Component getPlayerAtlasTooltip(net.minecraft.world.entity.player.Player player) {
-        Component defaultText = Component.translatable("gui.antiqueatlas.openPlayerAtlas");
+        Component defaultText = Component.translatable("gui.navigate.openPlayerAtlas");
         if (!(player instanceof LocalPlayer localPlayer)) {
             return defaultText;
         }
@@ -56,7 +56,7 @@ public abstract class InventoryScreenMixin extends EffectRenderingInventoryScree
                         .<Component>map(name -> Component.empty()
                                 .append(defaultText)
                                 .append("\n")
-                                .append(Component.translatable("gui.antiqueatlas.playerAtlasName", name)))
+                                .append(Component.translatable("gui.navigate.playerAtlasName", name)))
                         .orElse(defaultText))
                 .findFirst()
                 .orElse(defaultText);

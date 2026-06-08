@@ -49,7 +49,7 @@ public class Marker {
 	}
 
 	/** The label "as is", it might be a placeholder in the format
-	 * "gui.antiqueatlas.marker.*" that has to be translated.
+	 * "gui.navigate.marker.*" that has to be translated.
 	 */
 	public Component getLabel() {
 		return label;

@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.stereowalker.unionlib.resource.ReloadListener;
 import com.stereowalker.unionlib.util.VersionHelper;
 import hunternif.mc.impl.atlas.AntiqueAtlas;
+import hunternif.mc.impl.atlas.core.scaning.TileHeightType;
 import hunternif.mc.impl.atlas.resource.ResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -97,7 +98,24 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
             throw new IllegalArgumentException("Invalid tile id: " + tile);
         }
 
-        return new TileSelectionRule(source, priority, tileId, tilePrefix, readDimensions(object), readOutputTiles(object));
+        return new TileSelectionRule(
+                source,
+                priority,
+                tileId,
+                tilePrefix,
+                readDimensions(match, object),
+                readResourceLocations(match, object, "biome_tile", "biome_tiles"),
+                readOptionalString(match, object, "biome_tile_prefix"),
+                readResourceLocations(match, object, "global_tile", "global_tiles"),
+                readOptionalString(match, object, "global_tile_prefix"),
+                readOptionalBoolean(match, object, "has_global_tile"),
+                readHeightTypes(match, object),
+                readOptionalInt(match, object, "min_surface_y"),
+                readOptionalInt(match, object, "max_surface_y"),
+                readResourceLocations(match, object, "adjacent_biome_tile", "adjacent_biome_tiles_any"),
+                readResourceLocations(match, object, "adjacent_global_tile", "adjacent_global_tiles_any"),
+                readOutputTiles(object)
+        );
     }
 
     private List<ResourceLocation> readOutputTiles(JsonObject object) {
@@ -135,25 +153,10 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
         outputTiles.add(tileId);
     }
 
-    private Set<ResourceLocation> readDimensions(JsonObject object) {
+    private Set<ResourceLocation> readDimensions(JsonObject primary, JsonObject fallback) {
         Set<ResourceLocation> dimensions = new HashSet<>();
-        if (object.has("dimension")) {
-            ResourceLocation dimension = ResourceLocation.tryParse(object.getAsJsonPrimitive("dimension").getAsString());
-            if (dimension != null) {
-                dimensions.add(dimension);
-            }
-        }
-
-        JsonArray dimensionsArray = object.getAsJsonArray("dimensions");
-        if (dimensionsArray != null) {
-            for (JsonElement dimensionElement : dimensionsArray) {
-                ResourceLocation dimension = ResourceLocation.tryParse(dimensionElement.getAsString());
-                if (dimension != null) {
-                    dimensions.add(dimension);
-                }
-            }
-        }
-
+        readResourceLocationSet(primary, "dimension", "dimensions", dimensions);
+        readResourceLocationSet(fallback, "dimension", "dimensions", dimensions);
         return dimensions;
     }
 
@@ -165,6 +168,80 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
             return fallback.getAsJsonPrimitive(key).getAsString();
         }
         return null;
+    }
+
+    private Integer readOptionalInt(JsonObject primary, JsonObject fallback, String key) {
+        if (primary != null && primary.has(key)) {
+            return primary.getAsJsonPrimitive(key).getAsInt();
+        }
+        if (fallback.has(key)) {
+            return fallback.getAsJsonPrimitive(key).getAsInt();
+        }
+        return null;
+    }
+
+    private Boolean readOptionalBoolean(JsonObject primary, JsonObject fallback, String key) {
+        if (primary != null && primary.has(key)) {
+            return primary.getAsJsonPrimitive(key).getAsBoolean();
+        }
+        if (fallback.has(key)) {
+            return fallback.getAsJsonPrimitive(key).getAsBoolean();
+        }
+        return null;
+    }
+
+    private Set<TileHeightType> readHeightTypes(JsonObject primary, JsonObject fallback) {
+        Set<TileHeightType> heightTypes = EnumSet.noneOf(TileHeightType.class);
+        readHeightTypeValues(primary, "height_type", "height_types", heightTypes);
+        readHeightTypeValues(fallback, "height_type", "height_types", heightTypes);
+        return heightTypes;
+    }
+
+    private void readHeightTypeValues(JsonObject object, String singleKey, String arrayKey, Set<TileHeightType> target) {
+        if (object == null) {
+            return;
+        }
+        if (object.has(singleKey)) {
+            target.add(TileHeightType.fromName(object.getAsJsonPrimitive(singleKey).getAsString()));
+        }
+        JsonArray array = object.getAsJsonArray(arrayKey);
+        if (array == null) {
+            return;
+        }
+        for (JsonElement element : array) {
+            target.add(TileHeightType.fromName(element.getAsString()));
+        }
+    }
+
+    private Set<ResourceLocation> readResourceLocations(JsonObject primary, JsonObject fallback, String singleKey, String arrayKey) {
+        Set<ResourceLocation> values = new HashSet<>();
+        readResourceLocationSet(primary, singleKey, arrayKey, values);
+        readResourceLocationSet(fallback, singleKey, arrayKey, values);
+        return values;
+    }
+
+    private void readResourceLocationSet(JsonObject object, String singleKey, String arrayKey, Set<ResourceLocation> target) {
+        if (object == null) {
+            return;
+        }
+        if (object.has(singleKey)) {
+            ResourceLocation id = ResourceLocation.tryParse(object.getAsJsonPrimitive(singleKey).getAsString());
+            if (id == null) {
+                throw new IllegalArgumentException("Invalid resource id: " + object.getAsJsonPrimitive(singleKey).getAsString());
+            }
+            target.add(id);
+        }
+        JsonArray array = object.getAsJsonArray(arrayKey);
+        if (array == null) {
+            return;
+        }
+        for (JsonElement element : array) {
+            ResourceLocation id = ResourceLocation.tryParse(element.getAsString());
+            if (id == null) {
+                throw new IllegalArgumentException("Invalid resource id: " + element.getAsString());
+            }
+            target.add(id);
+        }
     }
 
     private void readSourcePriorities(ResourceLocation resourceId, JsonObject object, TileSelectionRules rules) {
@@ -206,7 +283,24 @@ public class TileSelectionConfig implements ResourceReloadListener<TileSelection
         }
 
         for (Entry<String, JsonElement> entry : prefixPriorities.entrySet()) {
-            rules.addRule(new TileSelectionRule(TileSelectionSource.GLOBAL, entry.getValue().getAsInt(), null, entry.getKey(), Collections.emptySet(), Collections.emptyList()));
+            rules.addRule(new TileSelectionRule(
+                    TileSelectionSource.GLOBAL,
+                    entry.getValue().getAsInt(),
+                    null,
+                    entry.getKey(),
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    null,
+                    Collections.emptySet(),
+                    null,
+                    null,
+                    Collections.emptySet(),
+                    null,
+                    null,
+                    Collections.emptySet(),
+                    Collections.emptySet(),
+                    Collections.emptyList()
+            ));
         }
     }
 

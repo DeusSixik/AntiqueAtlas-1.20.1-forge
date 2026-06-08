@@ -16,7 +16,7 @@ public class DeathWatcher {
         if (AntiqueAtlas.CONFIG.autoDeathMarker && !player.level().isClientSide()) {
             for (int atlasID : AtlasAPI.getAccessibleAtlases(player)) {
                 AtlasAPI.getMarkerAPI().putMarker(player.getCommandSenderWorld(), true, atlasID, VersionHelper.toLoc("navigate:tomb"),
-                        Component.translatable("gui.antiqueatlas.marker.tomb", player.getName()),
+                        Component.translatable("gui.navigate.marker.tomb", player.getName()),
                         (int) player.getX(), (int) player.getZ());
                 AntiqueAtlas.deathMarkerService.trimExcessDeathMarkers(player.level(), atlasID);
             }

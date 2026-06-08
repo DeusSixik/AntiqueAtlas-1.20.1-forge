@@ -93,14 +93,14 @@ public class GuiAtlas extends GuiComponent {
         public void onEnterState() {
             // Set the button as not selected so that it can be clicked again:
             btnShowMarkers.setSelected(false);
-            btnShowMarkers.setTitle(Component.translatable("gui.antiqueatlas.showMarkers"));
+            btnShowMarkers.setTitle(Component.translatable("gui.navigate.showMarkers"));
             btnShowMarkers.setIconTexture(Textures.ICON_SHOW_MARKERS);
         }
 
         @Override
         public void onExitState() {
             btnShowMarkers.setSelected(false);
-            btnShowMarkers.setTitle(Component.translatable("gui.antiqueatlas.hideMarkers"));
+            btnShowMarkers.setTitle(Component.translatable("gui.navigate.hideMarkers"));
             btnShowMarkers.setIconTexture(Textures.ICON_HIDE_MARKERS);
         }
     };
@@ -356,7 +356,7 @@ public class GuiAtlas extends GuiComponent {
         btnRight.addListener(positionListener);
         btnPosition.addListener(positionListener);
 
-        btnExportPng = new GuiBookmarkButton(1, Textures.ICON_EXPORT, Component.translatable("gui.antiqueatlas.exportImage")) {
+        btnExportPng = new GuiBookmarkButton(1, Textures.ICON_EXPORT, Component.translatable("gui.navigate.exportImage")) {
             @Override
             public boolean isEnabled() {
                 return !ExportImageUtil.isExporting;
@@ -370,7 +370,7 @@ public class GuiAtlas extends GuiComponent {
             }
         });
 
-        btnMarker = new GuiBookmarkButton(0, Textures.ICON_ADD_MARKER, Component.translatable("gui.antiqueatlas.addMarker"));
+        btnMarker = new GuiBookmarkButton(0, Textures.ICON_ADD_MARKER, Component.translatable("gui.navigate.addMarker"));
         addChild(btnMarker).offsetGuiCoords(300, 14);
         btnMarker.addListener(button -> {
             if (state.is(PLACING_MARKER)) {
@@ -404,7 +404,7 @@ public class GuiAtlas extends GuiComponent {
                 }
             }
         });
-        btnDelMarker = new GuiBookmarkButton(2, Textures.ICON_DELETE_MARKER, Component.translatable("gui.antiqueatlas.delMarker"));
+        btnDelMarker = new GuiBookmarkButton(2, Textures.ICON_DELETE_MARKER, Component.translatable("gui.navigate.delMarker"));
         addChild(btnDelMarker).offsetGuiCoords(300, 33);
         btnDelMarker.addListener(button -> {
             if (state.is(DELETING_MARKER)) {
@@ -415,7 +415,7 @@ public class GuiAtlas extends GuiComponent {
                 state.switchTo(DELETING_MARKER);
             }
         });
-        btnShowMarkers = new GuiBookmarkButton(3, Textures.ICON_HIDE_MARKERS, Component.translatable("gui.antiqueatlas.hideMarkers"));
+        btnShowMarkers = new GuiBookmarkButton(3, Textures.ICON_HIDE_MARKERS, Component.translatable("gui.navigate.hideMarkers"));
         addChild(btnShowMarkers).offsetGuiCoords(300, 52);
         btnShowMarkers.addListener(button -> {
             selectedButton = null;
@@ -672,7 +672,7 @@ public class GuiAtlas extends GuiComponent {
 
                 Log.error(e2, "Image is STILL too large, how massive is this map?! Answer: (%dx%d)", outWidth, outHeight);
 
-                ExportUpdateListener.INSTANCE.setStatusString(I18n.get("gui.antiqueatlas.export.tooLarge"));
+                ExportUpdateListener.INSTANCE.setStatusString(I18n.get("gui.navigate.export.tooLarge"));
                 ExportImageUtil.isExporting = false;
                 return; //Don't switch to normal state yet so that the error message can be read.
             }
@@ -1528,8 +1528,8 @@ public class GuiAtlas extends GuiComponent {
      * Update all text labels to current localization.
      */
     public void updateL18n() {
-        btnExportPng.setTitle(Component.translatable("gui.antiqueatlas.exportImage"));
-        btnMarker.setTitle(Component.translatable("gui.antiqueatlas.addMarker"));
+        btnExportPng.setTitle(Component.translatable("gui.navigate.exportImage"));
+        btnMarker.setTitle(Component.translatable("gui.navigate.addMarker"));
     }
 
     /**

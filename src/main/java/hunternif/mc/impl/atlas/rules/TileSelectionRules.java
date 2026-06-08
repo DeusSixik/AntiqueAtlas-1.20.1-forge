@@ -37,6 +37,15 @@ public class TileSelectionRules {
     }
 
     public synchronized int getPriority(TileSelectionSource source, ResourceLocation tileId, ResourceLocation dimensionId) {
+        return getPriority(TileSelectionContext.basic(source, tileId, dimensionId));
+    }
+
+    public synchronized int getPriority(TileSelectionContext context) {
+        if (context == null) {
+            return Integer.MIN_VALUE;
+        }
+
+        ResourceLocation tileId = context.candidateTileId();
         if (tileId == null) {
             return Integer.MIN_VALUE;
         }
@@ -46,9 +55,9 @@ public class TileSelectionRules {
             return exactPriority;
         }
 
-        int bestPriority = sourcePriorities.getOrDefault(source, 0);
+        int bestPriority = sourcePriorities.getOrDefault(context.source(), 0);
         for (TileSelectionRule rule : rules) {
-            if (rule.matches(source, tileId, dimensionId) && rule.priority() > bestPriority) {
+            if (rule.matches(context) && rule.priority() > bestPriority) {
                 bestPriority = rule.priority();
             }
         }
@@ -61,13 +70,28 @@ public class TileSelectionRules {
                                                            long worldSeed,
                                                            int chunkX,
                                                            int chunkZ) {
+        return resolveOutputTile(TileSelectionContext.basic(source, tileId, dimensionId), worldSeed, chunkX, chunkZ);
+    }
+
+    public synchronized ResourceLocation resolveOutputTile(TileSelectionContext context) {
+        if (context == null) {
+            return null;
+        }
+        return resolveOutputTile(context, context.worldSeed(), context.chunkX(), context.chunkZ());
+    }
+
+    private ResourceLocation resolveOutputTile(TileSelectionContext context,
+                                               long worldSeed,
+                                               int chunkX,
+                                               int chunkZ) {
+        ResourceLocation tileId = context.candidateTileId();
         if (tileId == null) {
             return null;
         }
 
         TileSelectionRule bestRule = null;
         for (TileSelectionRule rule : rules) {
-            if (!rule.hasOutputTiles() || !rule.matches(source, tileId, dimensionId)) {
+            if (!rule.hasOutputTiles() || !rule.matches(context)) {
                 continue;
             }
             if (bestRule == null || rule.priority() > bestRule.priority()) {
@@ -85,7 +109,7 @@ public class TileSelectionRules {
         }
 
         long hash = worldSeed;
-        hash = hash * 31L + source.ordinal();
+        hash = hash * 31L + context.source().ordinal();
         hash = hash * 31L + chunkX;
         hash = hash * 31L + chunkZ;
         hash = hash * 31L + tileId.hashCode();
@@ -94,6 +118,15 @@ public class TileSelectionRules {
     }
 
     public synchronized int getExplicitPriority(TileSelectionSource source, ResourceLocation tileId, ResourceLocation dimensionId) {
+        return getExplicitPriority(TileSelectionContext.basic(source, tileId, dimensionId));
+    }
+
+    public synchronized int getExplicitPriority(TileSelectionContext context) {
+        if (context == null) {
+            return Integer.MIN_VALUE;
+        }
+
+        ResourceLocation tileId = context.candidateTileId();
         if (tileId == null) {
             return Integer.MIN_VALUE;
         }
@@ -101,7 +134,7 @@ public class TileSelectionRules {
         Integer exactPriority = tilePriorities.get(tileId);
         int bestPriority = exactPriority != null ? exactPriority : Integer.MIN_VALUE;
         for (TileSelectionRule rule : rules) {
-            if (rule.isExplicitMatcher() && rule.matches(source, tileId, dimensionId) && rule.priority() > bestPriority) {
+            if (rule.isExplicitMatcher() && rule.matches(context) && rule.priority() > bestPriority) {
                 bestPriority = rule.priority();
             }
         }

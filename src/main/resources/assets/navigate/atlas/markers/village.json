@@ -3,6 +3,6 @@
 	"textures": [
 		"navigate:textures/gui/markers/village.png"
 	],
-	"title_key": "gui.antiqueatlas.marker.village",
-	"default_label_key": "gui.antiqueatlas.marker.village"
+	"title_key": "gui.navigate.marker.village",
+	"default_label_key": "gui.navigate.marker.village"
 }

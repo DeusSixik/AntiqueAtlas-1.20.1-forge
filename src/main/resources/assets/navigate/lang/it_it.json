@@ -2,22 +2,22 @@
   "item.navigate.navigation": "Antico atlante #%d",
   "item.navigate.empty_antique_atlas": "Antico atlante vuoto",
 
-  "gui.antiqueatlas.scalebar": "Scala in blocchi",
-  "gui.antiqueatlas.addMarker": "Aggiungi marcatore",
-  "gui.antiqueatlas.delMarker": "Elimina marcatore",
-  "gui.antiqueatlas.followPlayer": "Segui giocatore",
-  "gui.antiqueatlas.exportImage": "Esporta immagine",
-  "gui.antiqueatlas.hideMarkers": "Nascondi marcatori",
-  "gui.antiqueatlas.showMarkers": "Mostra marcatori",
+  "gui.navigate.scalebar": "Scala in blocchi",
+  "gui.navigate.addMarker": "Aggiungi marcatore",
+  "gui.navigate.delMarker": "Elimina marcatore",
+  "gui.navigate.followPlayer": "Segui giocatore",
+  "gui.navigate.exportImage": "Esporta immagine",
+  "gui.navigate.hideMarkers": "Nascondi marcatori",
+  "gui.navigate.showMarkers": "Mostra marcatori",
 
-  "gui.antiqueatlas.marker.label": "Etichetta:",
-  "gui.antiqueatlas.marker.type": "Tipo:",
-  "gui.antiqueatlas.marker.village": "Villaggio",
-  "gui.antiqueatlas.marker.netherPortal": "Portale degli Inferi",
+  "gui.navigate.marker.label": "Etichetta:",
+  "gui.navigate.marker.type": "Tipo:",
+  "gui.navigate.marker.village": "Villaggio",
+  "gui.navigate.marker.netherPortal": "Portale degli Inferi",
 
-  "gui.antiqueatlas.export.opening": "Aprendo la pagina di dialogo...",
-  "gui.antiqueatlas.export.selectFile": "Seleziona dove salvare il file PNG",
-  "gui.antiqueatlas.export.tooLarge": "Spiacenti! L'immagine è troppo grande da renderizzare, prova a incrementare la dimensione della memoria heap di Java.",
-  "gui.antiqueatlas.export.rendering": "Renderizzando...",
-  "gui.antiqueatlas.export.writing": "Scrivendo il file..."
+  "gui.navigate.export.opening": "Aprendo la pagina di dialogo...",
+  "gui.navigate.export.selectFile": "Seleziona dove salvare il file PNG",
+  "gui.navigate.export.tooLarge": "Spiacenti! L'immagine è troppo grande da renderizzare, prova a incrementare la dimensione della memoria heap di Java.",
+  "gui.navigate.export.rendering": "Renderizzando...",
+  "gui.navigate.export.writing": "Scrivendo il file..."
 }

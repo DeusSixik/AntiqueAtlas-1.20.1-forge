@@ -104,7 +104,7 @@ public class GuiMarkerFinalizer extends GuiComponent {
         addRenderableWidget(btnCancel = Button.builder(Component.translatable("gui.cancel"), (button) -> {
             closeChild();
         }).bounds(this.width / 2 + BUTTON_SPACING / 2, this.height / 2 + 40, BUTTON_WIDTH, 20).build());
-        textField = new EditBox(Minecraft.getInstance().font, (this.width - 200) / 2, this.height / 2 - 81, 200, 20, Component.translatable("gui.antiqueatlas.marker.label"));
+        textField = new EditBox(Minecraft.getInstance().font, (this.width - 200) / 2, this.height / 2 - 81, 200, 20, Component.translatable("gui.navigate.marker.label"));
         textField.setEditable(true);
         textField.setValue("");
         this.addRenderableWidget(this.textField);
@@ -180,9 +180,9 @@ public class GuiMarkerFinalizer extends GuiComponent {
     @Override
     public void render(GuiGraphics matrices, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(matrices);
-        drawCentered(matrices, Component.translatable("gui.antiqueatlas.marker.label"), this.height / 2 - 97, 0xffffff, true);
+        drawCentered(matrices, Component.translatable("gui.navigate.marker.label"), this.height / 2 - 97, 0xffffff, true);
         textField.render(matrices, mouseX, mouseY, partialTick);
-        drawCentered(matrices, Component.translatable("gui.antiqueatlas.marker.type"), this.height / 2 - 44, 0xffffff, true);
+        drawCentered(matrices, Component.translatable("gui.navigate.marker.type"), this.height / 2 - 44, 0xffffff, true);
 
         // Darker background for marker type selector
         matrices.fillGradient(scroller.getGuiX() - TYPE_BG_FRAME, scroller.getGuiY() - TYPE_BG_FRAME,

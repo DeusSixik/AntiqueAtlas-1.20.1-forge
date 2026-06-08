@@ -64,7 +64,7 @@ public class GuiScaleBar extends GuiComponent {
         texture.draw(matrices, getGuiX(), getGuiY());
 
         if (isMouseOver) {
-            drawTooltip(Collections.singletonList(Component.translatable("gui.antiqueatlas.scalebar")), Minecraft.getInstance().font);
+            drawTooltip(Collections.singletonList(Component.translatable("gui.navigate.scalebar")), Minecraft.getInstance().font);
         }
     }
 }

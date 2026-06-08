@@ -43,7 +43,7 @@ public class ExportImageUtil {
     }
 
     static {
-        chooser.setDialogTitle(I18n.get("gui.antiqueatlas.exportImage"));
+        chooser.setDialogTitle(I18n.get("gui.navigate.exportImage"));
         chooser.setSelectedFile(new File("Atlas.png"));
         chooser.setFileFilter(new FileFilter() {
             @Override
@@ -69,7 +69,7 @@ public class ExportImageUtil {
      */
     public static File selectPngFileToSave(String atlasName) {
         getListener().setHeaderString("");
-        getListener().setStatusString("gui.antiqueatlas.export.opening");
+        getListener().setStatusString("gui.navigate.export.opening");
         getListener().setProgressMax(-1);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -77,7 +77,7 @@ public class ExportImageUtil {
             Log.error(e, "Setting system Look&Feel for JFileChooser");
         }
 
-        getListener().setStatusString("gui.antiqueatlas.export.selectFile");
+        getListener().setStatusString("gui.navigate.export.selectFile");
         frame = new Frame();
         if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
@@ -98,7 +98,7 @@ public class ExportImageUtil {
      */
     public static void exportPngImage(WorldData biomeData, DimensionMarkersData globalMarkers,
                                       DimensionMarkersData localMarkers, File file, boolean showMarkers, int step) {
-        getListener().setHeaderString("gui.antiqueatlas.export.setup");
+        getListener().setHeaderString("gui.navigate.export.setup");
         ExportRenderArea renderArea = ExportRenderArea.from(biomeData.getScope(), step);
         // Prepare output image
         // Leave padding of one row of map tiles on each side
@@ -107,7 +107,7 @@ public class ExportImageUtil {
         int outWidth = renderArea.outWidth;
         int outHeight = renderArea.outHeight;
         Log.info("Image size: %dx%d", outWidth, outHeight);
-        getListener().setStatusString("gui.antiqueatlas.export.makingbuffer", outWidth, outHeight);
+        getListener().setStatusString("gui.navigate.export.makingbuffer", outWidth, outHeight);
         BufferedImage outImage = new BufferedImage(outWidth, outHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = outImage.createGraphics();
 
@@ -119,7 +119,7 @@ public class ExportImageUtil {
 
         // Preload all textures (they should be small enough)
         // Count loaded textures as update units too.
-        getListener().setStatusString("gui.antiqueatlas.export.loadingtextures");
+        getListener().setStatusString("gui.navigate.export.loadingtextures");
         getListener().setProgressMax(-1);
         BufferedImage bg = null;
         Map<ResourceLocation, BufferedImage> textureImageMap = new HashMap<>();
@@ -151,7 +151,7 @@ public class ExportImageUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        getListener().setHeaderString("gui.antiqueatlas.export.rendering");
+        getListener().setHeaderString("gui.navigate.export.rendering");
         drawMapToGraphics(
                 graphics,
                 bgTilesX, bgTilesY, outWidth, outHeight,
@@ -163,7 +163,7 @@ public class ExportImageUtil {
 
         try {
             getListener().setHeaderString("");
-            getListener().setStatusString("gui.antiqueatlas.export.writing");
+            getListener().setStatusString("gui.navigate.export.writing");
             ImageIO.write(outImage, "PNG", file);
             Log.info("Done writing image");
         } catch (IOException e) {
@@ -193,7 +193,7 @@ public class ExportImageUtil {
 
         // Preload all textures (they should be small enough)
         // Count loaded textures as update units too.
-        getListener().setStatusString("gui.antiqueatlas.export.loadingtextures");
+        getListener().setStatusString("gui.navigate.export.loadingtextures");
         getListener().setProgressMax(-1);
         BufferedImage bg = null;
         final Map<ResourceLocation, BufferedImage> textureImageMap = new HashMap<>();
@@ -253,7 +253,7 @@ public class ExportImageUtil {
         RenderedImage outImage = new RenderedImageScanned(outWidth, outHeight, scanBuffer, graphics -> {
             int slice = (int) Math.floor(-graphics.getTransform().getTranslateY() / sliceHeight_);
             getListener().setProgress(slice);
-            getListener().setHeaderString("gui.antiqueatlas.export.renderstripe", slice + 1, slices);
+            getListener().setHeaderString("gui.navigate.export.renderstripe", slice + 1, slices);
             drawMapToGraphics(
                     graphics,
                     bgTilesX, bgTilesY, outWidth, outHeight,
@@ -262,12 +262,12 @@ public class ExportImageUtil {
                     showMarkers, minX, minY,
                     renderArea.tileScope, renderArea.step,
                     scale, bg_);
-            getListener().setStatusString("gui.antiqueatlas.export.writestripe");
+            getListener().setStatusString("gui.navigate.export.writestripe");
             getListener().setProgressMax(sliceHeight_ * (slice + 1) > outHeight ? outHeight - (sliceHeight_ * slice) : sliceHeight_);
         }, value -> getListener().setProgress(value));
 
         try {
-            getListener().setHeaderString("gui.antiqueatlas.export.renderstripe", 1, slices);
+            getListener().setHeaderString("gui.navigate.export.renderstripe", 1, slices);
             ImageIO.write(outImage, "PNG", file);
             Log.info("Done writing image");
         } catch (IOException e) {
@@ -344,7 +344,7 @@ public class ExportImageUtil {
                                           DimensionMarkersData globalMarkers, DimensionMarkersData localMarkers,
                                           boolean showMarkers, int minX, int minY, Rect tileScope, int step,
                                           int scale, BufferedImage bg) {
-        getListener().setStatusString("gui.antiqueatlas.export.rendering.background");
+        getListener().setStatusString("gui.navigate.export.rendering.background");
         getListener().setProgressMax(bgTilesX * bgTilesY);
         //================ Draw map background ================
         // Top left corner:
@@ -404,7 +404,7 @@ public class ExportImageUtil {
         getListener().addProgress(1);
 
         //============= Draw actual map tiles ==============
-        getListener().setStatusString("gui.antiqueatlas.export.rendering.map");
+        getListener().setStatusString("gui.navigate.export.rendering.map");
         int tileColumns = getTileCount(tileScope.minX, tileScope.maxX, step);
         int tileRows = getTileCount(tileScope.minY, tileScope.maxY, step);
         getListener().setProgressMax(tileColumns * tileRows);
@@ -441,7 +441,7 @@ public class ExportImageUtil {
 
         //============== Draw markers ================
         // Draw local markers on top of global markers
-        getListener().setStatusString("gui.antiqueatlas.export.rendering.markers");
+        getListener().setStatusString("gui.navigate.export.rendering.markers");
         getListener().setProgressMax(-1);
 
         java.util.List<Marker> markers = new ArrayList<>();

@@ -33,13 +33,13 @@ public class CartographyTableHooks {
 
                     if (icon.getType() == MapDecoration.Type.RED_X) {
                         type = AntiqueAtlas.id("red_x_small");
-                        label = Component.translatable("gui.antiqueatlas.marker.treasure");
+                        label = Component.translatable("gui.navigate.marker.treasure");
                     } else if (icon.getType() == MapDecoration.Type.MONUMENT) {
                         type = AntiqueAtlas.id("monument");
-                        label = Component.translatable("gui.antiqueatlas.marker.monument");
+                        label = Component.translatable("gui.navigate.marker.monument");
                     } else if (icon.getType() == MapDecoration.Type.MANSION) {
                         type = AntiqueAtlas.id("mansion");
-                        label = Component.translatable("gui.antiqueatlas.marker.mansion");
+                        label = Component.translatable("gui.navigate.marker.mansion");
                     }
 
                     if (type != null) {

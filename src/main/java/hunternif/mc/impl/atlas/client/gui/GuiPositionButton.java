@@ -36,7 +36,7 @@ public class GuiPositionButton extends GuiComponentButton {
             RenderSystem.disableBlend();
 
             if (isMouseOver) {
-                drawTooltip(Collections.singletonList(Component.translatable("gui.antiqueatlas.followPlayer")), Minecraft.getInstance().font);
+                drawTooltip(Collections.singletonList(Component.translatable("gui.navigate.followPlayer")), Minecraft.getInstance().font);
             }
         }
     }
